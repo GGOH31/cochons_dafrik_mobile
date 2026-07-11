@@ -43,6 +43,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   pinput: ^6.0.2
   shared_preferences: ^2.5.5
+  lucide_icons: ^0.257.0
 
 dev_dependencies:
   flutter_test:

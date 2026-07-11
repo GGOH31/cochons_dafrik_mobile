@@ -179,6 +179,62 @@ class AuthService extends BaseService {
     }
   }
 
+  /// Demande la réinitialisation du mot de passe (forgot-password).
+  Future<Map<String, dynamic>> forgotPassword(String phone) async {
+    try {
+      final response = await dio.post(
+        AuthEndPoints.forgotPassword,
+        data: {'phone': phone},
+      );
+
+      final data = response.data;
+      if (data != null && data['success'] == true) {
+        return data;
+      } else {
+        throw Exception(data != null ? data['message'] : 'Erreur lors de la demande');
+      }
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData != null && responseData['message'] != null) {
+        throw Exception(responseData['message']);
+      }
+      throw Exception('Erreur réseau : ${e.message}');
+    }
+  }
+
+  /// Réinitialise le mot de passe (reset-password).
+  Future<Map<String, dynamic>> resetPassword({
+    required String phone,
+    required String code,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      final response = await dio.post(
+        AuthEndPoints.resetPassword,
+        data: {
+          'phone': phone,
+          'code': code,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        },
+      );
+
+      final data = response.data;
+      if (data != null && data['success'] == true) {
+        return data;
+      } else {
+        throw Exception(data != null ? data['message'] : 'Erreur lors de la réinitialisation');
+      }
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData != null && responseData['message'] != null) {
+        throw Exception(responseData['message']);
+      }
+      throw Exception('Erreur réseau : ${e.message}');
+    }
+  }
+
   /// Déconnecte l'utilisateur en supprimant son token d'authentification.
   void logout() {
     DioClient.instance.removeAuthToken();

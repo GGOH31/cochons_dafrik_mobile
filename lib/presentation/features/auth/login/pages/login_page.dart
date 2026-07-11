@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           password: _passwordController.text,
         );
         
-        await _authService.login(request);
+        final payload = await _authService.login(request);
 
         if (mounted) {
           setState(() {
@@ -52,7 +53,23 @@ class _LoginPageState extends State<LoginPage> {
 
           showCdaSnackBar(context, 'Connexion réussie !');
 
-          // Rediriger vers l'écran d'accueil ou tableau de bord
+          // Rediriger vers l'écran d'accueil approprié selon le rôle
+          final user = payload['user'];
+          final role = user != null ? user['role'] : 'client';
+          
+          if (role == 'vendeur') {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.homeVendeur,
+              (route) => false,
+            );
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.homeClient,
+              (route) => false,
+            );
+          }
         }
       } catch (e) {
         if (mounted) {
@@ -186,12 +203,11 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
   
-                  // Mot de passe oublié
                   Align(
                     alignment: Alignment.topRight,
                     child: TextButton(
                       onPressed: () {
-                        // Action mot de passe oublié
+                        Navigator.pushNamed(context, AppRoutes.forgetPassword);
                       },
                       child: Text(
                         "Mot de passe oublié ?",

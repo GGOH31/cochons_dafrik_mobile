@@ -17,6 +17,9 @@ class CdaTextFormField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final String? initialValue;
   final bool enabled;
+  final int? minLines;
+  final int? maxLines;
+  final int? maxLength;
 
   const CdaTextFormField({
     super.key,
@@ -30,6 +33,9 @@ class CdaTextFormField extends StatefulWidget {
     this.onChanged,
     this.initialValue,
     this.enabled = true,
+    this.minLines,
+    this.maxLines,
+    this.maxLength,
   });
 
   @override
@@ -49,6 +55,9 @@ class _CdaTextFormFieldState extends State<CdaTextFormField> {
       validator: widget.validator,
       onChanged: widget.onChanged,
       enabled: widget.enabled,
+      minLines: widget.isPassword ? 1 : widget.minLines,
+      maxLines: widget.isPassword ? 1 : widget.maxLines,
+      maxLength: widget.maxLength,
       style: GoogleFonts.nunito(
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -76,7 +85,9 @@ class _CdaTextFormFieldState extends State<CdaTextFormField> {
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
-                  _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: CdaColors.gris,
                 ),
                 onPressed: () {
@@ -88,7 +99,10 @@ class _CdaTextFormFieldState extends State<CdaTextFormField> {
             : null,
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: CdaColors.ligne, width: 1.5),
@@ -107,7 +121,10 @@ class _CdaTextFormFieldState extends State<CdaTextFormField> {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: CdaColors.ligne.withOpacity(0.5), width: 1.0),
+          borderSide: BorderSide(
+            color: CdaColors.ligne.withOpacity(0.5),
+            width: 1.0,
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
+import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/pinPut_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/domains/services/auth_service.dart';
@@ -22,6 +23,8 @@ class _OtpPageState extends State<OtpPage> {
   final _pinController = TextEditingController();
   final _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
+// ... (omitting intermediate state lines for target content stability)
+
 
   bool _isLoading = false;
   int _secondsRemaining = 60;
@@ -103,7 +106,7 @@ class _OtpPageState extends State<OtpPage> {
       });
 
       try {
-        await _authService.verifyOtp(widget.phoneNumber, otp);
+        final payload = await _authService.verifyOtp(widget.phoneNumber, otp);
 
         if (mounted) {
           setState(() {
@@ -112,7 +115,22 @@ class _OtpPageState extends State<OtpPage> {
 
           showCdaSnackBar(context, "Code vérifié avec succès !");
           
-          Navigator.pop(context, true);
+          final user = payload['user'];
+          final role = user != null ? user['role'] : 'client';
+          
+          if (role == 'vendeur') {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.homeVendeur,
+              (route) => false,
+            );
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.homeClient,
+              (route) => false,
+            );
+          }
         }
       } catch (e) {
         if (mounted) {

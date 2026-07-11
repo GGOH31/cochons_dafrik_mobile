@@ -5,4 +5,11 @@ class AppRoutes {
   static const register = '/register';
   static const sendOtp = '/sendOtp';
   static const verifyOtp = '/verifyOtp';
+  static const homeClient = '/homeClient';
+  static const productClient = '/productClient';
+  static const shops = '/shops';
+  static const productDetail = '/productDetail';
+  static const homeVendeur = '/homeVendeur';
+  static const forgetPassword = '/forgetPassword';
+  static const resetPassword = '/resetPassword';
 }
