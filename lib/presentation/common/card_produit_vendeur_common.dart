@@ -4,6 +4,7 @@ import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 
 class CardProduitVendeurCommon extends StatelessWidget {
   final String emoji;
+  final String? photoUrl;
   final String name;
   final String statusLabel;
   final Color statusColor;
@@ -14,6 +15,7 @@ class CardProduitVendeurCommon extends StatelessWidget {
   const CardProduitVendeurCommon({
     super.key,
     required this.emoji,
+    this.photoUrl,
     required this.name,
     required this.statusLabel,
     required this.statusColor,
@@ -51,7 +53,22 @@ class CardProduitVendeurCommon extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Text(emoji, style: const TextStyle(fontSize: 22)),
+                      if (photoUrl != null && photoUrl!.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            photoUrl!,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                          ),
+                        )
+                      else
+                        Text(emoji, style: const TextStyle(fontSize: 22)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -68,7 +85,10 @@ class CardProduitVendeurCommon extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(8),
@@ -87,10 +107,7 @@ class CardProduitVendeurCommon extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               details,
-              style: GoogleFonts.nunito(
-                fontSize: 13,
-                color: CdaColors.gris,
-              ),
+              style: GoogleFonts.nunito(fontSize: 13, color: CdaColors.gris),
             ),
           ],
         ),

@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://192.168.1.5:8000';
+  static const String baseUrl = 'http://10.47.199.131:8000';
 }
 
 class ApiBase {
@@ -13,5 +13,16 @@ class AuthEndPoints {
   static const String verifyOtp = '${ApiBase.baseUrlV1}auth/verify-otp';
   static const String forgotPassword = '${ApiBase.baseUrlV1}auth/forgot-password';
   static const String resetPassword = '${ApiBase.baseUrlV1}auth/reset-password';
+}
+
+class VendeurEndPoints {
+  static const String categories = '${ApiBase.baseUrlV1}vendeur/categories';
+  static const String products = '${ApiBase.baseUrlV1}vendeur/products';
+  static const String accompaniments = '${ApiBase.baseUrlV1}vendeur/accompaniments';
+  static const String promotions = '${ApiBase.baseUrlV1}vendeur/promotions';
+}
+
+class ClientEndPoints {
+  static const String shops = '${ApiBase.baseUrlV1}client/shops';
 }
 

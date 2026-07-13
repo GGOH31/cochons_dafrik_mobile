@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/card_categorie_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/categories/pages/category_form_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -12,67 +13,140 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
-  final List<Map<String, dynamic>> _categories = [
-    {"name": "Grillades", "emoji": "🍖", "count": 4},
-    {"name": "Accompagnements", "emoji": "🥗", "count": 3},
-    {"name": "Boissons", "emoji": "🥤", "count": 5},
-    {"name": "Formules Midi", "emoji": "🍱", "count": 2},
-  ];
+  final VendeurService _vendeurService = VendeurService();
+  List<dynamic> _categories = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final categories = await _vendeurService.getCategories();
+      setState(() {
+        _categories = categories;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur de chargement : $e"),
+            backgroundColor: CdaColors.rouge,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteCategory(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Supprimer"),
+        content: const Text("Voulez-vous vraiment supprimer cette catégorie ?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Supprimer", style: TextStyle(color: CdaColors.rouge)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await _vendeurService.deleteCategory(id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Catégorie supprimée !"),
+              backgroundColor: CdaColors.vertForet,
+            ),
+          );
+        }
+        _loadCategories();
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Erreur de suppression : $e"),
+              backgroundColor: CdaColors.rouge,
+            ),
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      body: ListView.builder(
-        padding: const EdgeInsets.all(20.0),
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final cat = _categories[index];
-          return CardCategorieCommon(
-            name: cat["name"],
-            emoji: cat["emoji"],
-            count: cat["count"],
-            onDelete: () {
-              setState(() {
-                _categories.removeAt(index);
-              });
-            },
-            onTap: () async {
-              final result = await Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CategoryFormPage(initialCategory: cat),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: CdaColors.vertForet),
+            )
+          : _categories.isEmpty
+              ? const Center(
+                  child: Text(
+                    "Aucune catégorie trouvée.",
+                    style: TextStyle(color: CdaColors.gris, fontSize: 16),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(20.0),
+                  itemCount: _categories.length,
+                  itemBuilder: (context, index) {
+                    final cat = _categories[index];
+                    return CardCategorieCommon(
+                      name: cat["name"] ?? "",
+                      emoji: cat["emojis"] ?? "🥗",
+                      count: cat["products_count"] ?? 0,
+                      onDelete: () => _deleteCategory(cat["id"]),
+                      onTap: () async {
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CategoryFormPage(initialCategory: cat),
+                          ),
+                        );
+                        if (result == true) {
+                          _loadCategories();
+                        }
+                      },
+                    );
+                  },
                 ),
-              );
-              if (result != null) {
-                setState(() {
-                  _categories[index] = {
-                    "name": result["name"],
-                    "emoji": result["emoji"],
-                    "count": cat["count"],
-                  };
-                });
-              }
-            },
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.push<Map<String, dynamic>>(
+          final result = await Navigator.push<bool>(
             context,
             MaterialPageRoute(
               builder: (context) => const CategoryFormPage(),
             ),
           );
-          if (result != null) {
-            setState(() {
-              _categories.add({
-                "name": result["name"],
-                "emoji": result["emoji"],
-                "count": 0,
-              });
-            });
+          if (result == true) {
+            _loadCategories();
           }
         },
         backgroundColor: CdaColors.vertForet,

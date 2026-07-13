@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final Map<String, dynamic>? initialCategory;
@@ -15,13 +16,15 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   final _nameController = TextEditingController();
   String _selectedEmoji = "🥗";
   final List<String> _emojiOptions = ["🥗", "🍖", "🥤", "🍱", "🌶️", "🌾", "🍛"];
+  bool _isLoading = false;
+  final VendeurService _vendeurService = VendeurService();
 
   @override
   void initState() {
     super.initState();
     if (widget.initialCategory != null) {
       _nameController.text = widget.initialCategory!["name"] ?? "";
-      _selectedEmoji = widget.initialCategory!["emoji"] ?? "🥗";
+      _selectedEmoji = widget.initialCategory!["emojis"] ?? widget.initialCategory!["emoji"] ?? "🥗";
     }
   }
 
@@ -31,23 +34,49 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     super.dispose();
   }
 
-  void _save() {
-    if (_nameController.text.trim().isEmpty) {
+  Future<void> _save() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez entrer un nom.")),
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Catégorie enregistrée !"),
-        backgroundColor: CdaColors.vertForet,
-      ),
-    );
-    Navigator.pop(context, {
-      "name": _nameController.text.trim(),
-      "emoji": _selectedEmoji,
+
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      if (widget.initialCategory != null) {
+        final int id = widget.initialCategory!["id"];
+        await _vendeurService.updateCategory(id, name, _selectedEmoji);
+      } else {
+        await _vendeurService.createCategory(name, _selectedEmoji);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Catégorie enregistrée !"),
+            backgroundColor: CdaColors.vertForet,
+          ),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur lors de l'enregistrement : $e"),
+            backgroundColor: CdaColors.rouge,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -133,19 +162,28 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: _save,
+                onPressed: _isLoading ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: CdaColors.vertForet,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
-                child: Text(
-                  "Enregistrer",
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "Enregistrer",
+                        style: GoogleFonts.nunito(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],

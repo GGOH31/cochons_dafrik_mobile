@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
@@ -9,6 +13,7 @@ import 'package:cochons_dafrik_mobile/presentation/common/boutiquue_card_common.
 import 'package:cochons_dafrik_mobile/presentation/features/client/commande_client/pages/commande_client_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/profil_client/pages/profil_client_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
 
 class HomeClientPage extends StatefulWidget {
   const HomeClientPage({super.key});
@@ -19,6 +24,108 @@ class HomeClientPage extends StatefulWidget {
 
 class _HomeClientPageState extends State<HomeClientPage> {
   int _currentTab = 0;
+  String _userName = 'Awa';
+  String _locationLabel = "• Cocody, Abidjan";
+  final ClientService _clientService = ClientService();
+  List<Boutique> _boutiques = [];
+  bool _isShopsLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+    _determinePosition();
+    _fetchShops();
+  }
+
+  Future<void> _fetchShops() async {
+    setState(() {
+      _isShopsLoading = true;
+    });
+    try {
+      final shopsJson = await _clientService.getShops();
+      setState(() {
+        _boutiques = shopsJson.map((s) => Boutique.fromJson(s)).toList();
+        _isShopsLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isShopsLoading = false;
+      });
+      debugPrint("Erreur lors du chargement des boutiques: $e");
+    }
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userString = prefs.getString('user');
+      if (userString != null) {
+        final Map<String, dynamic> user = jsonDecode(userString);
+        final fullName = user['full_name'];
+        if (fullName != null && fullName.toString().trim().isNotEmpty) {
+          setState(() {
+            _userName = fullName.toString();
+          });
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _determinePosition() async {
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return;
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
+      );
+
+      final geocoding = Geocoding();
+      final List<Placemark> placemarks = await geocoding
+          .placemarkFromCoordinates(position.latitude, position.longitude);
+
+      if (placemarks.isNotEmpty) {
+        final Placemark place = placemarks.first;
+        final String? subLocality = place.subLocality;
+        final String? locality = place.locality;
+
+        String commune = 'Cocody';
+        if (subLocality != null && subLocality.isNotEmpty) {
+          commune = subLocality;
+        } else if (locality != null && locality.isNotEmpty) {
+          commune = locality;
+        }
+
+        setState(() {
+          _locationLabel = "• $commune, Abidjan";
+        });
+      }
+    } catch (e) {
+      debugPrint("Erreur lors de la récupération de la localisation: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +208,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
             Row(
               children: [
                 Text(
-                  "Bonjour Awa 👋 ",
+                  "Bonjour $_userName 👋 ",
                   style: GoogleFonts.nunito(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -109,7 +216,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
                   ),
                 ),
                 Text(
-                  "• Cocody, Abidjan",
+                  _locationLabel,
                   style: GoogleFonts.nunito(
                     fontSize: 14,
                     color: Colors.white.withOpacity(0.7),
@@ -289,31 +396,47 @@ class _HomeClientPageState extends State<HomeClientPage> {
                         // Grille des Boutiques
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 0.85,
-                                ),
-                            itemCount: mockBoutiques.length,
-                            itemBuilder: (context, index) {
-                              final boutique = mockBoutiques[index];
-                              return BoutiqueCard(
-                                boutique: boutique,
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.productClient,
-                                    arguments: boutique,
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                          child: _isShopsLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(CdaColors.vertForet),
+                                  ),
+                                )
+                              : _boutiques.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        "Aucune boutique disponible",
+                                        style: GoogleFonts.nunito(
+                                          color: CdaColors.gris,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    )
+                                  : GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 16,
+                                            mainAxisSpacing: 16,
+                                            childAspectRatio: 0.85,
+                                          ),
+                                      itemCount: _boutiques.length,
+                                      itemBuilder: (context, index) {
+                                        final boutique = _boutiques[index];
+                                        return BoutiqueCard(
+                                          boutique: boutique,
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.productClient,
+                                              arguments: boutique,
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
                         ),
 
                         const SizedBox(height: 40),
@@ -368,7 +491,9 @@ class _HomeClientPageState extends State<HomeClientPage> {
                         children: [
                           const Text("🔥 ", style: TextStyle(fontSize: 16)),
                           Text(
-                            "12 vendeurs ouverts près de vous",
+                            _isShopsLoading
+                                ? "Recherche de boutiques..."
+                                : "${_boutiques.length} boutiques ouvertes près de vous",
                             style: GoogleFonts.nunito(
                               fontWeight: FontWeight.w800,
                               color: CdaColors.encre,

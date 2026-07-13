@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/commande_vendeur/pages/commande_vendeur_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/gestions_products_categories_promotions_page.dart';
@@ -16,6 +18,31 @@ class HomeVendeurPage extends StatefulWidget {
 
 class _HomeVendeurPageState extends State<HomeVendeurPage> {
   int _currentTab = 0;
+  String _userName = 'Tantie';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userString = prefs.getString('user');
+      if (userString != null) {
+        final Map<String, dynamic> user = jsonDecode(userString);
+        final fullName = user['full_name'];
+        if (fullName != null && fullName.toString().trim().isNotEmpty) {
+          setState(() {
+            _userName = fullName.toString();
+          });
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +148,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Bonjour Tantie 🐷",
+                      "Bonjour $_userName 🐷",
                       style: GoogleFonts.fredoka(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -373,7 +400,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "Bonjour Tantie 🐷",
+                            "Bonjour $_userName 🐷",
                             style: GoogleFonts.fredoka(fontSize: 26),
                           ),
                         ],
@@ -386,6 +413,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                     right: 0,
                     child: Center(
                       child: Container(
+                        width: 300,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 10,

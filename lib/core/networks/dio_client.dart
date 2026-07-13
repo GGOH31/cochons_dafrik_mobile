@@ -169,7 +169,7 @@ class DioClient {
           return handler.next(response);
         },
         onError: (DioException e, handler) {
-          if (e.response?.statusCode == 401) {
+          if (e.response?.statusCode == 401 || e.response?.statusCode == 500) {
             removeAuthToken();
           }
           return handler.next(e);

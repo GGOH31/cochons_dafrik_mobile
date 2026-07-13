@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:cochons_dafrik_mobile/core/constants/api_endpoints.dart';
 import 'package:cochons_dafrik_mobile/core/networks/dio_client.dart';
@@ -8,7 +10,8 @@ import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
 /// Service gérant toutes les opérations d'authentification de Cochons d'Afrik.
 /// Il communique avec les endpoints d'authentification du backend.
 class AuthService extends BaseService {
-  
+  final DioClient _dioClient = DioClient.instance;
+
   /// Connecte un utilisateur via son numéro de téléphone et son mot de passe.
   /// Stocke automatiquement le jeton d'authentification dans [DioClient].
   Future<Map<String, dynamic>> login(LoginRequest request) async {
@@ -22,8 +25,21 @@ class AuthService extends BaseService {
       if (data != null && data['success'] == true) {
         final payload = data['data'];
         final String? token = payload['token'];
+        final user = payload['user'];
         if (token != null) {
           DioClient.instance.setAuthToken(token);
+        }
+
+        if (user != null) {
+          await _dioClient.storeValue('user', jsonEncode(user));
+          final String? role = user['role'];
+          if (role != null) {
+            await _dioClient.storeValue('role', role);
+          }
+          final shop = user['shop'];
+          if (shop != null && shop['id'] != null) {
+            await _dioClient.storeValue('shop_id', shop['id'].toString());
+          }
         }
         return payload;
       } else {

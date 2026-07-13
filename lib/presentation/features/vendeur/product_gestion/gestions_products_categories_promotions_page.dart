@@ -4,6 +4,7 @@ import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/categories/pages/categories_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/products/pages/products_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/promotions/pages/promotions_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/accompaniments/pages/accompaniment_page.dart';
 
 class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
   const GestionsProductsCategoriesPromotionsPage({super.key});
@@ -11,7 +12,7 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: CdaColors.creme,
         body: Column(
@@ -22,7 +23,9 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 12),
               decoration: const BoxDecoration(
                 color: CdaColors.vertForet,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
               ),
               child: SafeArea(
                 top: false,
@@ -46,15 +49,15 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
                       unselectedLabelColor: Colors.white.withOpacity(0.6),
                       labelStyle: GoogleFonts.nunito(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
-                      unselectedLabelStyle: GoogleFonts.nunito(
-                        fontSize: 15,
-                      ),
+                      unselectedLabelStyle: GoogleFonts.nunito(fontSize: 14),
+                      isScrollable: true,
                       tabs: const [
                         Tab(text: "Catégories"),
                         Tab(text: "Produits"),
                         Tab(text: "Promotions"),
+                        Tab(text: "Accompagnements"),
                       ],
                     ),
                   ],
@@ -69,6 +72,7 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
                   CategoriesPage(),
                   ProductsPage(),
                   PromotionsPage(),
+                  AccompanimentPage(),
                 ],
               ),
             ),

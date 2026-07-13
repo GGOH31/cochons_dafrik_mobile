@@ -45,7 +45,7 @@ class CardProductCommon extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top colored section with Emoji
+            // Top colored section with Image or Emoji
             Container(
               height: 100,
               width: double.infinity,
@@ -55,12 +55,30 @@ class CardProductCommon extends StatelessWidget {
                   top: Radius.circular(15),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  product.emoji,
-                  style: const TextStyle(fontSize: 44),
-                ),
-              ),
+              child: product.photoUrl != null && product.photoUrl!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(15),
+                      ),
+                      child: Image.network(
+                        product.photoUrl!,
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Text(
+                            product.emoji,
+                            style: const TextStyle(fontSize: 44),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        product.emoji,
+                        style: const TextStyle(fontSize: 44),
+                      ),
+                    ),
             ),
             // Bottom details section
             Padding(

@@ -13,13 +13,46 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _quantity = 1;
   String _selectedSide = "Attiéké";
+  Map<String, dynamic>? _selectedSideMap;
+  bool _isInit = true;
 
-  Widget _buildSideChip(String name) {
-    final isSelected = _selectedSide == name;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      final product = ModalRoute.of(context)!.settings.arguments as Produit;
+      if (product.accompaniments.isNotEmpty) {
+        _selectedSideMap = Map<String, dynamic>.from(product.accompaniments.first);
+        final name = _selectedSideMap!['name'] ?? '';
+        final price = _selectedSideMap!['prix_unit'] ?? 0;
+        _selectedSide = price > 0 ? "$name (+$price F)" : name;
+      } else {
+        _selectedSideMap = null;
+        _selectedSide = "Aucun";
+      }
+      _isInit = false;
+    }
+  }
+
+  double _calculateTotalPrice(double productPrice) {
+    double accPrice = 0.0;
+    if (_selectedSideMap != null) {
+      accPrice = (_selectedSideMap!['prix_unit'] as num?)?.toDouble() ?? 0.0;
+    }
+    return (productPrice + accPrice) * _quantity;
+  }
+
+  Widget _buildSideChip(Map<String, dynamic> acc) {
+    final name = acc['name'] ?? '';
+    final price = acc['prix_unit'] ?? 0;
+    final displayLabel = price > 0 ? "$name (+$price F)" : name;
+
+    final isSelected = _selectedSideMap != null && _selectedSideMap!['id'] == acc['id'];
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedSide = name;
+          _selectedSideMap = acc;
+          _selectedSide = displayLabel;
         });
       },
       child: Container(
@@ -33,7 +66,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
         ),
         child: Text(
-          name,
+          displayLabel,
           style: GoogleFonts.nunito(
             fontSize: 15,
             fontWeight: FontWeight.bold,
@@ -101,12 +134,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Text(
-                          product.emoji,
-                          style: const TextStyle(fontSize: 100),
-                        ),
-                      ),
+                      child:
+                          product.photoUrl != null &&
+                              product.photoUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image.network(
+                                product.photoUrl!,
+                                width: double.infinity,
+                                height: 220,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Center(
+                                      child: Text(
+                                        product.emoji,
+                                        style: const TextStyle(fontSize: 100),
+                                      ),
+                                    ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                product.emoji,
+                                style: const TextStyle(fontSize: 100),
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -128,19 +180,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     runSpacing: 8,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: const Color(0xFF4CAF50), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFF4CAF50),
+                            width: 1.5,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star, color: Color(0xFF4CAF50), size: 14),
+                            const Icon(
+                              Icons.star,
+                              color: Color(0xFF4CAF50),
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              "${product.rating} (126 avis)",
+                              "${product.rating.toStringAsFixed(1)} (${product.ratingCount} avis)",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF4CAF50),
@@ -151,19 +213,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFAF6F0),
-                          border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFE5D5C5),
+                            width: 1.5,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.access_time_filled, color: Color(0xFF8D7A68), size: 14),
+                            const Icon(
+                              Icons.access_time_filled,
+                              color: Color(0xFF8D7A68),
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              "Prêt en 35 min",
+                              product.prepMinutes != null
+                                  ? "Prêt en ${product.prepMinutes} min"
+                                  : "Prêt en 15 min",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF8D7A68),
@@ -174,19 +248,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFAF6F0),
-                          border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFE5D5C5),
+                            width: 1.5,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.location_on, color: Color(0xFFC62828), size: 14),
+                            const Icon(
+                              Icons.location_on,
+                              color: Color(0xFFC62828),
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              "${product.shopName == 'Maquis Bello' ? 'Yopougon' : product.shopName == 'Chez Tantie Porc' ? 'Cocody' : 'Marcory'} · 2,1 km",
+                              "${product.shopLocation} · 2,1 km",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF8D7A68),
@@ -209,7 +293,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         height: 1.5,
                       ),
                       children: [
-                        const TextSpan(text: "Porc braisé au feu de bois, mariné aux épices maison. Servi avec attiéké, alloco ou frites, piment et oignons frais. Vendu par "),
+                        TextSpan(
+                          text:
+                              (product.description != null &&
+                                  product.description!.isNotEmpty)
+                              ? "${product.description}. Vendu par "
+                              : "Porc braisé au feu de bois, mariné aux épices maison. Vendu par ",
+                        ),
                         TextSpan(
                           text: product.shopName,
                           style: const TextStyle(
@@ -224,25 +314,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   const SizedBox(height: 24),
 
                   // Accompagnement Section
-                  Text(
-                    "Accompagnement",
-                    style: GoogleFonts.fredoka(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: CdaColors.vertForet,
+                  if (product.accompaniments.isNotEmpty) ...[
+                    Text(
+                      "Accompagnement",
+                      style: GoogleFonts.fredoka(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: CdaColors.vertForet,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildSideChip("Attiéké"),
-                      const SizedBox(width: 10),
-                      _buildSideChip("Alloco"),
-                      const SizedBox(width: 10),
-                      _buildSideChip("Frites"),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: product.accompaniments.map((acc) {
+                        return _buildSideChip(acc as Map<String, dynamic>);
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
                   // Quantity Selector
                   Row(
@@ -261,9 +351,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFAF6F0),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+                            border: Border.all(
+                              color: const Color(0xFFE5D5C5),
+                              width: 1.5,
+                            ),
                           ),
-                          child: const Icon(Icons.remove, color: CdaColors.encre),
+                          child: const Icon(
+                            Icons.remove,
+                            color: CdaColors.encre,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -288,7 +384,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFAF6F0),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+                            border: Border.all(
+                              color: const Color(0xFFE5D5C5),
+                              width: 1.5,
+                            ),
                           ),
                           child: const Icon(Icons.add, color: CdaColors.encre),
                         ),
@@ -329,7 +428,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("${product.name} (x$_quantity) avec $_selectedSide ajouté au panier !"),
+                          content: Text(
+                            "${product.name} (x$_quantity) avec $_selectedSide ajouté au panier !",
+                          ),
                           backgroundColor: CdaColors.vertForet,
                         ),
                       );
@@ -337,7 +438,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: CdaColors.vertForet,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 18,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
@@ -355,7 +459,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ),
                         Text(
-                          "${(_quantity * product.price).toInt()} F",
+                          "${_calculateTotalPrice(product.price).toInt()} F",
                           style: GoogleFonts.nunito(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

@@ -6,6 +6,7 @@ class Boutique {
   final String location;
   final String speciality;
   final List<Produit> products;
+  final String? logoUrl;
 
   const Boutique({
     required this.id,
@@ -15,7 +16,21 @@ class Boutique {
     required this.location,
     required this.speciality,
     required this.products,
+    this.logoUrl,
   });
+
+  factory Boutique.fromJson(Map<String, dynamic> json) {
+    return Boutique(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      rating: (json['rating_avg'] as num?)?.toDouble() ?? 0.0,
+      emoji: '🍖',
+      location: json['commune'] ?? 'Cocody',
+      speciality: json['description'] ?? 'Vendeur de porc braisé',
+      products: [],
+      logoUrl: json['logo_url'],
+    );
+  }
 }
 
 class Produit {
@@ -24,7 +39,13 @@ class Produit {
   final double price;
   final String emoji;
   final String shopName;
+  final String shopLocation;
   final double rating;
+  final int ratingCount;
+  final String? description;
+  final int? prepMinutes;
+  final String? photoUrl;
+  final List<dynamic> accompaniments;
 
   const Produit({
     required this.id,
@@ -32,145 +53,29 @@ class Produit {
     required this.price,
     required this.emoji,
     required this.shopName,
+    required this.shopLocation,
     required this.rating,
+    required this.ratingCount,
+    this.description,
+    this.prepMinutes,
+    this.photoUrl,
+    this.accompaniments = const [],
   });
-}
 
-const List<Boutique> mockBoutiques = [
-  Boutique(
-    id: '1',
-    name: 'Chez Tantie Porc',
-    rating: 4.8,
-    emoji: '🍖',
-    location: 'Cocody',
-    speciality: 'Porc braisé de qualité',
-    products: [
-      Produit(
-        id: '1_1',
-        name: 'Porc braisé (portion)',
-        price: 3500,
-        emoji: '🍖',
-        shopName: 'Chez Tantie Porc',
-        rating: 4.8,
-      ),
-      Produit(
-        id: '1_2',
-        name: 'Côtelettes grillées',
-        price: 4000,
-        emoji: '🥩',
-        shopName: 'Chez Tantie Porc',
-        rating: 4.8,
-      ),
-      Produit(
-        id: '1_3',
-        name: 'Saucisse de porc maison',
-        price: 2500,
-        emoji: '🌭',
-        shopName: 'Chez Tantie Porc',
-        rating: 4.8,
-      ),
-    ],
-  ),
-  Boutique(
-    id: '2',
-    name: "Le Fumoir d'Ali",
-    rating: 4.6,
-    emoji: '🐷',
-    location: 'Marcory',
-    speciality: 'Porc au four & fumé',
-    products: [
-      Produit(
-        id: '2_1',
-        name: 'Porc au four ½ kg',
-        price: 5000,
-        emoji: '🐷',
-        shopName: "Le Fumoir d'Ali",
-        rating: 4.6,
-      ),
-      Produit(
-        id: '2_2',
-        name: 'Poitrine fumée',
-        price: 6000,
-        emoji: '🥓',
-        shopName: "Le Fumoir d'Ali",
-        rating: 4.6,
-      ),
-      Produit(
-        id: '2_3',
-        name: 'Jambonneau laqué',
-        price: 8500,
-        emoji: '🍖',
-        shopName: "Le Fumoir d'Ali",
-        rating: 4.6,
-      ),
-    ],
-  ),
-  Boutique(
-    id: '3',
-    name: 'Maquis Bello',
-    rating: 4.7,
-    emoji: '🥗',
-    location: 'Yopougon',
-    speciality: 'Accompagnements & Grillades',
-    products: [
-      Produit(
-        id: '3_1',
-        name: 'Menu braisé + attiéké',
-        price: 3000,
-        emoji: '🥗',
-        shopName: 'Maquis Bello',
-        rating: 4.7,
-      ),
-      Produit(
-        id: '3_2',
-        name: 'Alloco portion',
-        price: 1000,
-        emoji: '🍌',
-        shopName: 'Maquis Bello',
-        rating: 4.7,
-      ),
-      Produit(
-        id: '3_3',
-        name: 'Chou braisé',
-        price: 1500,
-        emoji: '🥬',
-        shopName: 'Maquis Bello',
-        rating: 4.7,
-      ),
-    ],
-  ),
-  Boutique(
-    id: '4',
-    name: 'Kôrô Grill',
-    rating: 4.9,
-    emoji: '🔥',
-    location: 'Riviera 3',
-    speciality: 'Spécialités de porc piquant',
-    products: [
-      Produit(
-        id: '4_1',
-        name: 'Porc fou épicé',
-        price: 4000,
-        emoji: '🔥',
-        shopName: 'Kôrô Grill',
-        rating: 4.9,
-      ),
-      Produit(
-        id: '4_2',
-        name: 'Brochettes de porc (3 pcs)',
-        price: 3000,
-        emoji: '🍢',
-        shopName: 'Kôrô Grill',
-        rating: 4.9,
-      ),
-      Produit(
-        id: '4_3',
-        name: 'Ribs caramélisés',
-        price: 5500,
-        emoji: '🍖',
-        shopName: 'Kôrô Grill',
-        rating: 4.9,
-      ),
-    ],
-  ),
-];
+  factory Produit.fromJson(Map<String, dynamic> json, String shopName, {String shopLocation = 'Cocody'}) {
+    return Produit(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      price: (json['price_fcfa'] as num?)?.toDouble() ?? 0.0,
+      emoji: '🍖',
+      shopName: shopName,
+      shopLocation: json['shop']?['commune'] ?? shopLocation,
+      rating: (json['rating_avg'] as num?)?.toDouble() ?? 0.0,
+      ratingCount: json['rating_count'] as int? ?? 0,
+      description: json['description'],
+      prepMinutes: json['prep_minutes'] as int?,
+      photoUrl: json['photo_url'],
+      accompaniments: json['accompaniments'] as List<dynamic>? ?? [],
+    );
+  }
+}
