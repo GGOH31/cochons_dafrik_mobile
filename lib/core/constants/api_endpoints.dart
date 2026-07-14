@@ -24,5 +24,6 @@ class VendeurEndPoints {
 
 class ClientEndPoints {
   static const String shops = '${ApiBase.baseUrlV1}client/shops';
+  static const String searchProducts = '${ApiBase.baseUrlV1}client/products/search';
 }
 

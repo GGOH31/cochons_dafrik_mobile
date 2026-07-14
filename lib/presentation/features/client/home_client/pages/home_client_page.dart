@@ -10,6 +10,7 @@ import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/appHeaderBanner_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/boutiquue_card_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/card_product_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/commande_client/pages/commande_client_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/profil_client/pages/profil_client_page.dart';
@@ -31,12 +32,58 @@ class _HomeClientPageState extends State<HomeClientPage> {
   List<Boutique> _boutiques = [];
   bool _isShopsLoading = true;
 
+  String _searchQuery = "";
+  List<Produit> _searchResults = [];
+  bool _isSearchLoading = false;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _determinePosition();
     _fetchShops();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _performSearch(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchQuery = "";
+        _searchResults = [];
+        _isSearchLoading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _searchQuery = trimmed;
+      _isSearchLoading = true;
+    });
+
+    try {
+      final resultsJson = await _clientService.searchProducts(trimmed);
+      setState(() {
+        _searchResults = resultsJson.map((p) {
+          final shop = p['shop'] ?? {};
+          final shopName = shop['name'] ?? 'Boutique';
+          final shopLocation = shop['commune'] ?? 'Cocody';
+          return Produit.fromJson(p, shopName, shopLocation: shopLocation);
+        }).toList();
+        _isSearchLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isSearchLoading = false;
+      });
+      debugPrint("Erreur lors de la recherche des produits: $e");
+    }
   }
 
   Future<void> _fetchShops() async {
@@ -279,17 +326,39 @@ class _HomeClientPageState extends State<HomeClientPage> {
                   height: 48,
                 ) // Matches standard TextField height approximately
               : TextField(
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: _performSearch,
+                  onChanged: (val) {
+                    setState(() {});
+                    if (val.trim().isEmpty) {
+                      _performSearch("");
+                    }
+                  },
                   decoration: InputDecoration(
                     icon: const Icon(
                       LucideIcons.search,
                       color: CdaColors.gris,
                       size: 20,
                     ),
-                    hintText: "Porc braisé, porc au four, vendeur...",
+                    hintText: "Porc braisé, porc au four...",
                     hintStyle: GoogleFonts.nunito(
                       color: CdaColors.gris,
                       fontSize: 15,
                     ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              _performSearch("");
+                            },
+                            child: const Icon(
+                              Icons.clear,
+                              color: CdaColors.gris,
+                              size: 20,
+                            ),
+                          )
+                        : null,
                     border: InputBorder.none,
                   ),
                 ),
@@ -379,90 +448,224 @@ class _HomeClientPageState extends State<HomeClientPage> {
                     //     ],
                     //   ),
                     // ),
-                    Column(
-                      children: [
-                        // Section Title "Populaires près de vous"
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Populaires près de vous",
-                                style: GoogleFonts.fredoka(
-                                  fontSize: 20,
+                    if (_searchQuery.isNotEmpty) ...[
+                      // Search Results view
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Résultats de recherche",
+                              style: GoogleFonts.fredoka(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: CdaColors.encre,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                _searchController.clear();
+                                _performSearch("");
+                              },
+                              child: Text(
+                                "Annuler",
+                                style: GoogleFonts.nunito(
+                                  color: CdaColors.rouge,
                                   fontWeight: FontWeight.bold,
-                                  color: CdaColors.encre,
+                                  fontSize: 14,
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () => Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.shops,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _isSearchLoading
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40.0),
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    CdaColors.vertForet,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : _searchResults.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 40.0,
                                 ),
                                 child: Text(
-                                  "Voir tout",
+                                  "Aucun produit trouvé pour \"$_searchQuery\"",
                                   style: GoogleFonts.nunito(
-                                    color: CdaColors.rouge,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    color: CdaColors.gris,
+                                    fontSize: 15,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        // Grille des Boutiques
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: _isShopsLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      CdaColors.vertForet,
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0,
+                              ),
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                      childAspectRatio: 0.82,
                                     ),
+                                itemCount: _searchResults.length,
+                                itemBuilder: (context, index) {
+                                  final product = _searchResults[index];
+                                  return CardProductCommon(
+                                    product: product,
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.productDetail,
+                                        arguments: product,
+                                      );
+                                    },
+                                    onAddTap: () {
+                                      CartService.instance.addToCart(
+                                        productId: product.id,
+                                        productName: product.name,
+                                        productPrice: product.price,
+                                        productPhotoUrl: product.photoUrl,
+                                        productEmoji: product.emoji,
+                                        shopName: product.shopName,
+                                        quantity: 1,
+                                        selectedSide:
+                                            product.accompaniments.isNotEmpty
+                                            ? (product
+                                                      .accompaniments
+                                                      .first['name'] ??
+                                                  'Sans accompagnement')
+                                            : 'Sans accompagnement',
+                                        selectedSidePrice:
+                                            product.accompaniments.isNotEmpty
+                                            ? ((product
+                                                              .accompaniments
+                                                              .first['prix_unit']
+                                                          as num?)
+                                                      ?.toDouble() ??
+                                                  0.0)
+                                            : 0.0,
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "${product.name} ajouté au panier !",
+                                          ),
+                                          duration: const Duration(seconds: 1),
+                                          backgroundColor: CdaColors.vertForet,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                      const SizedBox(height: 40),
+                    ] else ...[
+                      Column(
+                        children: [
+                          // Section Title "Populaires près de vous"
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Populaires près de vous",
+                                  style: GoogleFonts.fredoka(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: CdaColors.encre,
                                   ),
-                                )
-                              : _boutiques.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    "Aucune boutique disponible",
-                                    style: GoogleFonts.nunito(
-                                      color: CdaColors.gris,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                )
-                              : GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: 16,
-                                        mainAxisSpacing: 16,
-                                        childAspectRatio: 0.85,
-                                      ),
-                                  itemCount: _boutiques.length,
-                                  itemBuilder: (context, index) {
-                                    final boutique = _boutiques[index];
-                                    return BoutiqueCard(
-                                      boutique: boutique,
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRoutes.productClient,
-                                          arguments: boutique,
-                                        );
-                                      },
-                                    );
-                                  },
                                 ),
-                        ),
-
-                        const SizedBox(height: 40),
-                      ],
-                    ),
+                                TextButton(
+                                  onPressed: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.shops,
+                                  ),
+                                  child: Text(
+                                    "Voir tout",
+                                    style: GoogleFonts.nunito(
+                                      color: CdaColors.rouge,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Grille des Boutiques
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                            ),
+                            child: _isShopsLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        CdaColors.vertForet,
+                                      ),
+                                    ),
+                                  )
+                                : _boutiques.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "Aucune boutique disponible",
+                                      style: GoogleFonts.nunito(
+                                        color: CdaColors.gris,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                          childAspectRatio: 0.85,
+                                        ),
+                                    itemCount: _boutiques.length,
+                                    itemBuilder: (context, index) {
+                                      final boutique = _boutiques[index];
+                                      return BoutiqueCard(
+                                        boutique: boutique,
+                                        onTap: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.productClient,
+                                            arguments: boutique,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

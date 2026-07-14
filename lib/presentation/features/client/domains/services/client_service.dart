@@ -29,4 +29,18 @@ class ClientService extends BaseService {
       rethrow;
     }
   }
+
+  /// Rechercher des produits par leur nom (quel que soit la boutique)
+  Future<List<dynamic>> searchProducts(String name) async {
+    try {
+      final res = await getAll(ClientEndPoints.searchProducts, queryParameters: {'name': name});
+      if (res['success'] == true) {
+        return res['data'] as List<dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la recherche des produits');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
