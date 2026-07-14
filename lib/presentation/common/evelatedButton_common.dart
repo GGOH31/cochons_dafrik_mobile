@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 /// Un bouton élevé personnalisé réutilisable pour Cochons d'Afrik.
 /// Il prend en charge un état de chargement ([isLoading]) et des icônes optionnelles.
 class CdaElevatedButton extends StatelessWidget {
-  final String text;
+  final String? text;
+  final Widget? child;
   final VoidCallback? onPressed;
   final bool isLoading;
   final Color? backgroundColor;
@@ -15,7 +16,8 @@ class CdaElevatedButton extends StatelessWidget {
 
   const CdaElevatedButton({
     super.key,
-    required this.text,
+    this.text,
+    this.child,
     required this.onPressed,
     this.isLoading = false,
     this.backgroundColor,
@@ -23,7 +25,7 @@ class CdaElevatedButton extends StatelessWidget {
     this.icon,
     this.height = 52.0,
     this.width,
-  });
+  }) : assert(text != null || child != null, 'Either text or child must be provided');
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,9 @@ class CdaElevatedButton extends StatelessWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       minimumSize: Size(width ?? double.infinity, height),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
     );
 
     if (isLoading) {
@@ -65,7 +70,7 @@ class CdaElevatedButton extends StatelessWidget {
           style: buttonStyle,
           onPressed: onPressed,
           icon: icon!,
-          label: Text(text),
+          label: child ?? Text(text ?? ''),
         ),
       );
     }
@@ -76,7 +81,7 @@ class CdaElevatedButton extends StatelessWidget {
       child: ElevatedButton(
         style: buttonStyle,
         onPressed: onPressed,
-        child: Text(text),
+        child: child ?? Text(text ?? ''),
       ),
     );
   }

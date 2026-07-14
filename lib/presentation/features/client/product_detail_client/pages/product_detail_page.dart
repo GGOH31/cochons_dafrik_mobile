@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/quantity_selector_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key});
@@ -12,7 +15,6 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _quantity = 1;
-  String _selectedSide = "Attiéké";
   Map<String, dynamic>? _selectedSideMap;
   bool _isInit = true;
 
@@ -22,13 +24,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (_isInit) {
       final product = ModalRoute.of(context)!.settings.arguments as Produit;
       if (product.accompaniments.isNotEmpty) {
-        _selectedSideMap = Map<String, dynamic>.from(product.accompaniments.first);
-        final name = _selectedSideMap!['name'] ?? '';
-        final price = _selectedSideMap!['prix_unit'] ?? 0;
-        _selectedSide = price > 0 ? "$name (+$price F)" : name;
+        _selectedSideMap = Map<String, dynamic>.from(
+          product.accompaniments.first,
+        );
       } else {
         _selectedSideMap = null;
-        _selectedSide = "Aucun";
       }
       _isInit = false;
     }
@@ -47,12 +47,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final price = acc['prix_unit'] ?? 0;
     final displayLabel = price > 0 ? "$name (+$price F)" : name;
 
-    final isSelected = _selectedSideMap != null && _selectedSideMap!['id'] == acc['id'];
+    final isSelected =
+        _selectedSideMap != null && _selectedSideMap!['id'] == acc['id'];
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedSideMap = acc;
-          _selectedSide = displayLabel;
         });
       },
       child: Container(
@@ -335,72 +335,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ],
 
                   // Quantity Selector
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (_quantity > 1) {
-                            setState(() {
-                              _quantity--;
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFAF6F0),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFFE5D5C5),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.remove,
-                            color: CdaColors.encre,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Text(
-                        _quantity.toString(),
-                        style: GoogleFonts.nunito(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: CdaColors.encre,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _quantity++;
-                          });
-                        },
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFAF6F0),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFFE5D5C5),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Icon(Icons.add, color: CdaColors.encre),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        "portions",
-                        style: GoogleFonts.nunito(
-                          fontSize: 14,
-                          color: CdaColors.gris,
-                        ),
-                      ),
-                    ],
+                  QuantitySelectorCommon(
+                    quantity: _quantity,
+                    label: "portions",
+                    onIncrement: () {
+                      setState(() {
+                        _quantity++;
+                      });
+                    },
+                    onDecrement: () {
+                      if (_quantity > 1) {
+                        setState(() {
+                          _quantity--;
+                        });
+                      }
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -424,29 +373,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: CdaElevatedButton(
+                    backgroundColor: CdaColors.vertForet,
+                    foregroundColor: Colors.white,
+                    height: 56,
                     onPressed: () {
+                      final accName =
+                          _selectedSideMap?['name'] ?? 'Sans accompagnement';
+                      final accPrice =
+                          (_selectedSideMap?['prix_unit'] as num?)
+                              ?.toDouble() ??
+                          0.0;
+
+                      CartService.instance.addToCart(
+                        productId: product.id,
+                        productName: product.name,
+                        productPrice: product.price,
+                        productPhotoUrl: product.photoUrl,
+                        productEmoji: product.emoji,
+                        shopName: product.shopName,
+                        quantity: _quantity,
+                        selectedSide: accName,
+                        selectedSidePrice: accPrice,
+                      );
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            "${product.name} (x$_quantity) avec $_selectedSide ajouté au panier !",
+                            "${product.name} (x$_quantity) avec $accName ajouté au panier !",
                           ),
                           backgroundColor: CdaColors.vertForet,
                         ),
                       );
                       Navigator.pop(context);
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CdaColors.vertForet,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 18,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      elevation: 2,
-                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

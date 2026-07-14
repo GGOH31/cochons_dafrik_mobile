@@ -14,6 +14,7 @@ import 'package:cochons_dafrik_mobile/presentation/features/client/commande_clie
 import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/profil_client/pages/profil_client_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 
 class HomeClientPage extends StatefulWidget {
   const HomeClientPage({super.key});
@@ -158,20 +159,43 @@ class _HomeClientPageState extends State<HomeClientPage> {
             fontSize: 12,
           ),
           unselectedLabelStyle: GoogleFonts.nunito(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(LucideIcons.home),
               label: 'Accueil',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(LucideIcons.fileText),
               label: 'Commandes',
             ),
             BottomNavigationBarItem(
-              icon: Icon(LucideIcons.shoppingCart),
+              icon: ValueListenableBuilder<List<CartItem>>(
+                valueListenable: CartService.instance.cartNotifier,
+                builder: (context, cartItems, _) {
+                  final totalQuantity = cartItems.fold<int>(
+                    0,
+                    (sum, item) => sum + item.quantity,
+                  );
+                  if (totalQuantity == 0) {
+                    return const Icon(LucideIcons.shoppingCart);
+                  }
+                  return Badge(
+                    label: Text(
+                      totalQuantity.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    backgroundColor: CdaColors.rouge,
+                    child: const Icon(LucideIcons.shoppingCart),
+                  );
+                },
+              ),
               label: 'Panier',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(LucideIcons.user),
               label: 'Profil',
             ),
@@ -355,8 +379,6 @@ class _HomeClientPageState extends State<HomeClientPage> {
                     //     ],
                     //   ),
                     // ),
-                    const SizedBox(height: 24),
-
                     Column(
                       children: [
                         // Section Title "Populaires près de vous"
@@ -390,53 +412,52 @@ class _HomeClientPageState extends State<HomeClientPage> {
                             ],
                           ),
                         ),
-
-                        const SizedBox(height: 12),
-
                         // Grille des Boutiques
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20.0),
                           child: _isShopsLoading
                               ? const Center(
                                   child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(CdaColors.vertForet),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      CdaColors.vertForet,
+                                    ),
                                   ),
                                 )
                               : _boutiques.isEmpty
-                                  ? Center(
-                                      child: Text(
-                                        "Aucune boutique disponible",
-                                        style: GoogleFonts.nunito(
-                                          color: CdaColors.gris,
-                                          fontSize: 15,
-                                        ),
+                              ? Center(
+                                  child: Text(
+                                    "Aucune boutique disponible",
+                                    style: GoogleFonts.nunito(
+                                      color: CdaColors.gris,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                )
+                              : GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                        childAspectRatio: 0.85,
                                       ),
-                                    )
-                                  : GridView.builder(
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            crossAxisSpacing: 16,
-                                            mainAxisSpacing: 16,
-                                            childAspectRatio: 0.85,
-                                          ),
-                                      itemCount: _boutiques.length,
-                                      itemBuilder: (context, index) {
-                                        final boutique = _boutiques[index];
-                                        return BoutiqueCard(
-                                          boutique: boutique,
-                                          onTap: () {
-                                            Navigator.pushNamed(
-                                              context,
-                                              AppRoutes.productClient,
-                                              arguments: boutique,
-                                            );
-                                          },
+                                  itemCount: _boutiques.length,
+                                  itemBuilder: (context, index) {
+                                    final boutique = _boutiques[index];
+                                    return BoutiqueCard(
+                                      boutique: boutique,
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.productClient,
+                                          arguments: boutique,
                                         );
                                       },
-                                    ),
+                                    );
+                                  },
+                                ),
                         ),
 
                         const SizedBox(height: 40),
