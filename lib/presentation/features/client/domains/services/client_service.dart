@@ -43,4 +43,60 @@ class ClientService extends BaseService {
       rethrow;
     }
   }
+
+  /// Récupérer les informations personnelles du client
+  Future<Map<String, dynamic>> getPersonalInfo() async {
+    try {
+      final res = await getOne(ClientEndPoints.personalInfo);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des informations personnelles');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les adresses de livraison du client
+  Future<List<dynamic>> getAddresses() async {
+    try {
+      final res = await getAll(ClientEndPoints.getAddresses);
+      if (res['success'] == true) {
+        return res['data'] as List<dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des adresses de livraison');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Ajouter une adresse de livraison
+  Future<Map<String, dynamic>> addAddress(Map<String, dynamic> data) async {
+    try {
+      final res = await create(ClientEndPoints.addAddress, data);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? "Erreur lors de l'ajout de l'adresse");
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Modifier une adresse de livraison existante
+  Future<Map<String, dynamic>> updateAddress(String id, Map<String, dynamic> data) async {
+    try {
+      final res = await updateWithFormData(ClientEndPoints.updateAddress, data, id: id);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? "Erreur lors de la modification de l'adresse");
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

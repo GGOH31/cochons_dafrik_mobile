@@ -1,17 +1,67 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/domains/services/auth_service.dart';
 
-class ProfilVendeurPage extends StatelessWidget {
+class ProfilVendeurPage extends StatefulWidget {
   const ProfilVendeurPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final authService = AuthService();
+  State<ProfilVendeurPage> createState() => _ProfilVendeurPageState();
+}
 
+class _ProfilVendeurPageState extends State<ProfilVendeurPage> {
+  final AuthService _authService = AuthService();
+  String _userName = 'Vendeur';
+  String _shopName = '';
+  String _shopLocation = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userString = prefs.getString('user');
+      if (userString != null) {
+        final Map<String, dynamic> user = jsonDecode(userString);
+        final fullName = user['full_name'];
+        final shop = user['shop'];
+        setState(() {
+          if (fullName != null && fullName.toString().trim().isNotEmpty) {
+            _userName = fullName.toString();
+          }
+          if (shop != null) {
+            _shopName = shop['name']?.toString() ?? '';
+            final commune = shop['commune']?.toString();
+            final address = shop['address']?.toString();
+            if (commune != null &&
+                address != null &&
+                commune.isNotEmpty &&
+                address.isNotEmpty) {
+              _shopLocation = "$commune, $address";
+            } else if (commune != null && commune.isNotEmpty) {
+              _shopLocation = commune;
+            } else if (address != null && address.isNotEmpty) {
+              _shopLocation = address;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
       body: SafeArea(
@@ -28,23 +78,34 @@ class ProfilVendeurPage extends StatelessWidget {
                       radius: 50,
                       backgroundColor: CdaColors.vertForet.withOpacity(0.1),
                       child: Text(
-                        "🐷",
-                        style: GoogleFonts.fredoka(
-                          fontSize: 48,
-                        ),
+                        _userName[0].toUpperCase(),
+                        style: GoogleFonts.fredoka(fontSize: 48),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "Chez Tantie Porc",
+                      _userName,
                       style: GoogleFonts.fredoka(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: CdaColors.encre,
                       ),
                     ),
+                    if (_shopName.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _shopName,
+                        style: GoogleFonts.nunito(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: CdaColors.vertForet,
+                        ),
+                      ),
+                    ],
                     Text(
-                      "Yopougon, Abidjan",
+                      _shopLocation.isNotEmpty
+                          ? _shopLocation
+                          : "Yopougon, Abidjan",
                       style: GoogleFonts.nunito(
                         fontSize: 15,
                         color: CdaColors.gris,
@@ -60,22 +121,29 @@ class ProfilVendeurPage extends StatelessWidget {
                 icon: LucideIcons.store,
                 title: "Paramètres de la Boutique",
                 subtitle: "Nom, horaires, statut ouvert/fermé",
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, AppRoutes.infosBoutique).then((
+                    _,
+                  ) {
+                    _loadUserData();
+                  });
+                },
               ),
               const SizedBox(height: 12),
               _buildOption(
-                icon: LucideIcons.wallet,
-                title: "Informations de Paiement",
-                subtitle: "Mobile Money Configuré",
-                onTap: () {},
+                icon: LucideIcons.user,
+                title: "Informations Personnelles",
+                subtitle: "Nom, téléphone, email",
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.infosPersonnelles,
+                  ).then((_) {
+                    _loadUserData();
+                  });
+                },
               ),
-              const SizedBox(height: 12),
-              _buildOption(
-                icon: LucideIcons.helpCircle,
-                title: "Aide & Support",
-                subtitle: "FAQ, nous contacter",
-                onTap: () {},
-              ),
+
               const SizedBox(height: 36),
 
               // Logout Button
@@ -99,7 +167,7 @@ class ProfilVendeurPage extends StatelessWidget {
                   color: CdaColors.rouge,
                 ),
                 onTap: () {
-                  authService.logout();
+                  _authService.logout();
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.login,

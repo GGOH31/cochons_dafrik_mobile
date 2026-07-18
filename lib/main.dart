@@ -9,6 +9,8 @@ import 'package:cochons_dafrik_mobile/presentation/features/client/product_detai
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/home_vendeur/pages/home_vendeur_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/passwords/forgetPassword/pages/forget_password_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/passwords/resetPassword/pages/reset_password_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/profil_vendeur/pages/infos_boutique_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/profil_vendeur/pages/infos_perso_vendeur_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/themes/app_theme.dart';
@@ -66,6 +68,8 @@ class MyApp extends StatelessWidget {
         AppRoutes.homeVendeur: (context) => const HomeVendeurPage(),
         AppRoutes.forgetPassword: (context) => const ForgetPasswordPage(),
         AppRoutes.resetPassword: (context) => const ResetPasswordPage(),
+        AppRoutes.infosBoutique: (context) => const InfosBoutiquePage(),
+        AppRoutes.infosPersonnelles: (context) => const InfosPersoVendeurPage(),
       },
     );
   }

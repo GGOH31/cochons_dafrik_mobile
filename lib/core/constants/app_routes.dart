@@ -12,4 +12,6 @@ class AppRoutes {
   static const homeVendeur = '/homeVendeur';
   static const forgetPassword = '/forgetPassword';
   static const resetPassword = '/resetPassword';
+  static const infosBoutique = '/infosBoutique';
+  static const infosPersonnelles = '/infosPersonnelles';
 }

@@ -1,5 +1,6 @@
 import 'package:cochons_dafrik_mobile/core/constants/api_endpoints.dart';
 import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
+import 'package:dio/dio.dart';
 
 class VendeurService extends BaseService {
   /// Récupérer toutes les catégories
@@ -224,6 +225,59 @@ class VendeurService extends BaseService {
       final res = await delete(VendeurEndPoints.promotions, id: id);
       if (res['success'] != true) {
         throw Exception(res['message'] ?? 'Erreur lors de la suppression de la promotion');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les informations personnelles du vendeur
+  Future<Map<String, dynamic>> getPersonalInfo() async {
+    try {
+      final res = await getOne(VendeurEndPoints.personalInfo);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des informations personnelles');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les informations de la boutique du vendeur
+  Future<Map<String, dynamic>> getShopInfo() async {
+    try {
+      final res = await getOne(VendeurEndPoints.shopInfo);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement de la boutique');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Mettre à jour les informations de la boutique
+  Future<Map<String, dynamic>> updateShopInfo(Map<String, dynamic> data, {String? logoPath}) async {
+    try {
+      final Map<String, dynamic> formFields = Map<String, dynamic>.from(data);
+      if (logoPath != null && logoPath.isNotEmpty) {
+        final logoFileName = logoPath.split('/').last;
+        formFields['logo_url'] = await MultipartFile.fromFile(
+          logoPath,
+          filename: logoFileName,
+        );
+      }
+
+      final formData = FormData.fromMap(formFields);
+
+      final res = await createWithFormData(VendeurEndPoints.updateShopInfo, formData);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour de la boutique');
       }
     } catch (e) {
       rethrow;

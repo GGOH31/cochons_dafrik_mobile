@@ -1,6 +1,6 @@
 class ApiEndpoints {
-  // static const String baseUrl = 'http://10.47.199.131:8000';
-  static const String baseUrl = "http://150.107.201.90:8043";
+  static const String baseUrl = 'http://10.118.138.131:8000';
+  //static const String baseUrl = "http://150.107.201.90:8043";
 }
 
 class ApiBase {
@@ -21,10 +21,17 @@ class VendeurEndPoints {
   static const String products = '${ApiBase.baseUrlV1}vendeur/products';
   static const String accompaniments = '${ApiBase.baseUrlV1}vendeur/accompaniments';
   static const String promotions = '${ApiBase.baseUrlV1}vendeur/promotions';
+  static const String personalInfo = '${ApiBase.baseUrlV1}vendeur/profile/personal';
+  static const String shopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
+  static const String updateShopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
 }
 
 class ClientEndPoints {
   static const String shops = '${ApiBase.baseUrlV1}client/shops';
   static const String searchProducts = '${ApiBase.baseUrlV1}client/products/search';
+  static const String personalInfo = '${ApiBase.baseUrlV1}client/profile/personal';
+  static const String getAddresses = '${ApiBase.baseUrlV1}client/addresses';
+  static const String addAddress = '${ApiBase.baseUrlV1}client/addresses';
+  static const String updateAddress = '${ApiBase.baseUrlV1}client/addresses';
 }
 
