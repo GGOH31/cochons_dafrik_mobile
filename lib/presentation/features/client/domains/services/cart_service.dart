@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CartItem {
   final String id; // unique cart item id (e.g. productId + selectedSide)
   final String productId;
+  final String shopId;
   final String productName;
   final double productPrice;
   final String? productPhotoUrl;
@@ -17,6 +18,7 @@ class CartItem {
   CartItem({
     required this.id,
     required this.productId,
+    required this.shopId,
     required this.productName,
     required this.productPrice,
     this.productPhotoUrl,
@@ -31,6 +33,7 @@ class CartItem {
     return {
       'id': id,
       'productId': productId,
+      'shopId': shopId,
       'productName': productName,
       'productPrice': productPrice,
       'productPhotoUrl': productPhotoUrl,
@@ -46,6 +49,7 @@ class CartItem {
     return CartItem(
       id: json['id'],
       productId: json['productId'],
+      shopId: json['shopId'] ?? '',
       productName: json['productName'],
       productPrice: (json['productPrice'] as num).toDouble(),
       productPhotoUrl: json['productPhotoUrl'],
@@ -95,6 +99,7 @@ class CartService {
 
   void addToCart({
     required String productId,
+    required String shopId,
     required String productName,
     required double productPrice,
     String? productPhotoUrl,
@@ -115,6 +120,7 @@ class CartService {
       currentItems.add(CartItem(
         id: id,
         productId: productId,
+        shopId: shopId,
         productName: productName,
         productPrice: productPrice,
         productPhotoUrl: productPhotoUrl,

@@ -3,13 +3,20 @@ import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
 
 class ClientService extends BaseService {
   /// Récupérer la liste des boutiques
-  Future<List<dynamic>> getShops({Map<String, dynamic>? queryParameters}) async {
+  Future<List<dynamic>> getShops({
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
-      final res = await getAll(ClientEndPoints.shops, queryParameters: queryParameters);
+      final res = await getAll(
+        ClientEndPoints.shops,
+        queryParameters: queryParameters,
+      );
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des boutiques');
+        throw Exception(
+          res['message'] ?? 'Erreur lors du chargement des boutiques',
+        );
       }
     } catch (e) {
       rethrow;
@@ -17,13 +24,22 @@ class ClientService extends BaseService {
   }
 
   /// Récupérer les produits d'une boutique spécifique
-  Future<List<dynamic>> getShopProducts(String shopId, {Map<String, dynamic>? queryParameters}) async {
+  Future<List<dynamic>> getShopProducts(
+    String shopId, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
-      final res = await getAll('${ClientEndPoints.shops}/$shopId/products', queryParameters: queryParameters);
+      final res = await getAll(
+        '${ClientEndPoints.shops}/$shopId/products',
+        queryParameters: queryParameters,
+      );
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des produits de la boutique');
+        throw Exception(
+          res['message'] ??
+              'Erreur lors du chargement des produits de la boutique',
+        );
       }
     } catch (e) {
       rethrow;
@@ -33,11 +49,16 @@ class ClientService extends BaseService {
   /// Rechercher des produits par leur nom (quel que soit la boutique)
   Future<List<dynamic>> searchProducts(String name) async {
     try {
-      final res = await getAll(ClientEndPoints.searchProducts, queryParameters: {'name': name});
+      final res = await getAll(
+        ClientEndPoints.searchProducts,
+        queryParameters: {'name': name},
+      );
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la recherche des produits');
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la recherche des produits',
+        );
       }
     } catch (e) {
       rethrow;
@@ -51,7 +72,10 @@ class ClientService extends BaseService {
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des informations personnelles');
+        throw Exception(
+          res['message'] ??
+              'Erreur lors du chargement des informations personnelles',
+        );
       }
     } catch (e) {
       rethrow;
@@ -65,7 +89,10 @@ class ClientService extends BaseService {
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des adresses de livraison');
+        throw Exception(
+          res['message'] ??
+              'Erreur lors du chargement des adresses de livraison',
+        );
       }
     } catch (e) {
       rethrow;
@@ -79,7 +106,9 @@ class ClientService extends BaseService {
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? "Erreur lors de l'ajout de l'adresse");
+        throw Exception(
+          res['message'] ?? "Erreur lors de l'ajout de l'adresse",
+        );
       }
     } catch (e) {
       rethrow;
@@ -87,13 +116,66 @@ class ClientService extends BaseService {
   }
 
   /// Modifier une adresse de livraison existante
-  Future<Map<String, dynamic>> updateAddress(String id, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateAddress(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     try {
-      final res = await updateWithFormData(ClientEndPoints.updateAddress, data, id: id);
+      final res = await updateWithFormData(
+        ClientEndPoints.updateAddress,
+        data,
+        id: id,
+      );
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? "Erreur lors de la modification de l'adresse");
+        throw Exception(
+          res['message'] ?? "Erreur lors de la modification de l'adresse",
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les moyens de paiement actifs
+  Future<List<dynamic>> getPaymentMethods() async {
+    try {
+      final res = await getAll(ClientEndPoints.paymentMethods);
+      if (res['success'] == true) {
+        return res['data'] as List<dynamic>;
+      } else {
+        throw Exception(
+          res['message'] ?? 'Erreur lors du chargement des moyens de paiement',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Passer une commande
+  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> data) async {
+    try {
+      final res = await create(ClientEndPoints.orders, data);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la création de la commande');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Payer une commande (simulation)
+  Future<Map<String, dynamic>> payOrder(String orderId, Map<String, dynamic> data) async {
+    try {
+      final res = await create('${ClientEndPoints.orders}/$orderId/pay', data);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du paiement de la commande');
       }
     } catch (e) {
       rethrow;

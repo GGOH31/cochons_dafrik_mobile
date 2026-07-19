@@ -33,5 +33,7 @@ class ClientEndPoints {
   static const String getAddresses = '${ApiBase.baseUrlV1}client/addresses';
   static const String addAddress = '${ApiBase.baseUrlV1}client/addresses';
   static const String updateAddress = '${ApiBase.baseUrlV1}client/addresses';
+  static const String paymentMethods = '${ApiBase.baseUrlV1}client/payment-methods';
+  static const String orders = '${ApiBase.baseUrlV1}client/orders';
 }
 

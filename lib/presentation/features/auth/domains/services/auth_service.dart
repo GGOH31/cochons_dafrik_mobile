@@ -67,7 +67,9 @@ class AuthService extends BaseService {
       if (data != null && data['success'] == true) {
         return data;
       } else {
-        throw Exception(data != null ? data['message'] : "Erreur d'inscription");
+        throw Exception(
+          data != null ? data['message'] : "Erreur d'inscription",
+        );
       }
     } on DioException catch (e) {
       final responseData = e.response?.data;
@@ -94,7 +96,8 @@ class AuthService extends BaseService {
         formFields['shop[name]'] = shopData.name;
         formFields['shop[commune]'] = shopData.commune;
 
-        if (shopData.description != null && shopData.description!.trim().isNotEmpty) {
+        if (shopData.description != null &&
+            shopData.description!.trim().isNotEmpty) {
           formFields['shop[description]'] = shopData.description;
         }
         if (shopData.address != null && shopData.address!.trim().isNotEmpty) {
@@ -102,7 +105,8 @@ class AuthService extends BaseService {
         }
 
         // Ajout du fichier de logo si présent
-        if (shopData.logoFilePath != null && shopData.logoFilePath!.isNotEmpty) {
+        if (shopData.logoFilePath != null &&
+            shopData.logoFilePath!.isNotEmpty) {
           final logoFileName = shopData.logoFilePath!.split('/').last;
           formFields['shop[logo_file]'] = await MultipartFile.fromFile(
             shopData.logoFilePath!,
@@ -120,16 +124,15 @@ class AuthService extends BaseService {
 
       final formData = FormData.fromMap(formFields);
 
-      final response = await dio.post(
-        AuthEndPoints.register,
-        data: formData,
-      );
+      final response = await dio.post(AuthEndPoints.register, data: formData);
 
       final data = response.data;
       if (data != null && data['success'] == true) {
         return data;
       } else {
-        throw Exception(data != null ? data['message'] : "Erreur d'inscription");
+        throw Exception(
+          data != null ? data['message'] : "Erreur d'inscription",
+        );
       }
     } on DioException catch (e) {
       final responseData = e.response?.data;
@@ -152,7 +155,9 @@ class AuthService extends BaseService {
       if (data != null && data['success'] == true) {
         return data['message'] ?? 'Code renvoyé';
       } else {
-        throw Exception(data != null ? data['message'] : 'Erreur lors du renvoi du code');
+        throw Exception(
+          data != null ? data['message'] : 'Erreur lors du renvoi du code',
+        );
       }
     } on DioException catch (e) {
       final responseData = e.response?.data;
@@ -169,10 +174,7 @@ class AuthService extends BaseService {
     try {
       final response = await dio.post(
         AuthEndPoints.verifyOtp,
-        data: {
-          'phone': phone,
-          'code': code,
-        },
+        data: {'phone': phone, 'code': code},
       );
 
       final data = response.data;
@@ -207,7 +209,9 @@ class AuthService extends BaseService {
       if (data != null && data['success'] == true) {
         return data;
       } else {
-        throw Exception(data != null ? data['message'] : 'Erreur lors de la demande');
+        throw Exception(
+          data != null ? data['message'] : 'Erreur lors de la demande',
+        );
       }
     } on DioException catch (e) {
       final responseData = e.response?.data;
@@ -240,7 +244,9 @@ class AuthService extends BaseService {
       if (data != null && data['success'] == true) {
         return data;
       } else {
-        throw Exception(data != null ? data['message'] : 'Erreur lors de la réinitialisation');
+        throw Exception(
+          data != null ? data['message'] : 'Erreur lors de la réinitialisation',
+        );
       }
     } on DioException catch (e) {
       final responseData = e.response?.data;

@@ -38,7 +38,15 @@ class _ProductClientPageState extends State<ProductClientPage> {
     try {
       final productsJson = await _clientService.getShopProducts(boutique.id);
       setState(() {
-        _products = productsJson.map((p) => Produit.fromJson(p, boutique.name, shopLocation: boutique.location)).toList();
+        _products = productsJson
+            .map(
+              (p) => Produit.fromJson(
+                p,
+                boutique.name,
+                shopLocation: boutique.location,
+              ),
+            )
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -89,7 +97,9 @@ class _ProductClientPageState extends State<ProductClientPage> {
                           color: Colors.white.withOpacity(0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: boutique.logoUrl != null && boutique.logoUrl!.isNotEmpty
+                        child:
+                            boutique.logoUrl != null &&
+                                boutique.logoUrl!.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(28),
                                 child: Image.network(
@@ -97,12 +107,13 @@ class _ProductClientPageState extends State<ProductClientPage> {
                                   width: 56,
                                   height: 56,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Center(
-                                    child: Text(
-                                      boutique.emoji,
-                                      style: const TextStyle(fontSize: 32),
-                                    ),
-                                  ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Center(
+                                        child: Text(
+                                          boutique.emoji,
+                                          style: const TextStyle(fontSize: 32),
+                                        ),
+                                      ),
                                 ),
                               )
                             : Center(
@@ -192,58 +203,63 @@ class _ProductClientPageState extends State<ProductClientPage> {
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 40.0),
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(CdaColors.vertForet),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            CdaColors.vertForet,
+                          ),
                         ),
                       ),
                     )
                   : _products.isEmpty
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 40.0),
-                            child: Text(
-                              "Aucun produit disponible dans cette boutique.",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.nunito(
-                                color: CdaColors.gris,
-                                fontSize: 15,
-                              ),
-                            ),
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40.0),
+                        child: Text(
+                          "Aucun produit disponible dans cette boutique.",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: CdaColors.gris,
+                            fontSize: 15,
                           ),
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                             childAspectRatio: 0.82,
                           ),
-                          itemCount: _products.length,
-                          itemBuilder: (context, index) {
-                            final product = _products[index];
-                            return CardProductCommon(
-                              product: product,
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.productDetail,
-                                  arguments: product,
-                                );
-                              },
-                              onAddTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("${product.name} ajouté au panier !"),
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
-                              },
+                      itemCount: _products.length,
+                      itemBuilder: (context, index) {
+                        final product = _products[index];
+                        return CardProductCommon(
+                          product: product,
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.productDetail,
+                              arguments: product,
                             );
                           },
-                        ),
+                          onAddTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "${product.name} ajouté au panier !",
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),

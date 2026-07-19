@@ -387,6 +387,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                       CartService.instance.addToCart(
                         productId: product.id,
+                        shopId: product.shopId,
                         productName: product.name,
                         productPrice: product.price,
                         productPhotoUrl: product.photoUrl,

@@ -35,6 +35,7 @@ class Boutique {
 
 class Produit {
   final String id;
+  final String shopId;
   final String name;
   final double price;
   final String emoji;
@@ -49,6 +50,7 @@ class Produit {
 
   const Produit({
     required this.id,
+    required this.shopId,
     required this.name,
     required this.price,
     required this.emoji,
@@ -65,6 +67,7 @@ class Produit {
   factory Produit.fromJson(Map<String, dynamic> json, String shopName, {String shopLocation = 'Cocody'}) {
     return Produit(
       id: json['id']?.toString() ?? '',
+      shopId: json['shop_id']?.toString() ?? '',
       name: json['name'] ?? '',
       price: (json['price_fcfa'] as num?)?.toDouble() ?? 0.0,
       emoji: '🍖',
