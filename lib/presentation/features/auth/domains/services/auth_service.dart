@@ -6,6 +6,7 @@ import 'package:cochons_dafrik_mobile/core/networks/dio_client.dart';
 import 'package:cochons_dafrik_mobile/core/models/login_request.dart';
 import 'package:cochons_dafrik_mobile/core/models/store_user_request.dart';
 import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 
 /// Service gérant toutes les opérations d'authentification de Cochons d'Afrik.
 /// Il communique avec les endpoints d'authentification du backend.
@@ -40,6 +41,7 @@ class AuthService extends BaseService {
           if (shop != null && shop['id'] != null) {
             await _dioClient.storeValue('shop_id', shop['id'].toString());
           }
+          await CartService.instance.loadCart();
         }
         return payload;
       } else {
@@ -258,7 +260,8 @@ class AuthService extends BaseService {
   }
 
   /// Déconnecte l'utilisateur en supprimant son token d'authentification.
-  void logout() {
-    DioClient.instance.removeAuthToken();
+  Future<void> logout() async {
+    await DioClient.instance.removeAuthToken();
+    await CartService.instance.loadCart();
   }
 }

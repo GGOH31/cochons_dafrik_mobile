@@ -67,31 +67,59 @@ class CartService {
   static CartService get instance => _instance;
 
   CartService._internal() {
-    _loadCart();
+    loadCart();
   }
 
-  final ValueNotifier<List<CartItem>> cartNotifier = ValueNotifier<List<CartItem>>([]);
+  final ValueNotifier<List<CartItem>> cartNotifier =
+      ValueNotifier<List<CartItem>>([]);
 
   List<CartItem> get items => cartNotifier.value;
 
-  Future<void> _loadCart() async {
+  Future<String> _getCartKey() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cartStr = prefs.getString('client_cart');
-      if (cartStr != null) {
+      final userString = prefs.getString('user');
+      if (userString != null && userString.isNotEmpty) {
+        final Map<String, dynamic> user = jsonDecode(userString);
+        final userId = user['id'] ?? user['phone'] ?? user['email'];
+        if (userId != null && userId.toString().isNotEmpty) {
+          return 'client_cart_$userId';
+        }
+      }
+    } catch (e) {
+      debugPrint("Erreur lors de la récupération de la clé de panier: $e");
+    }
+    return 'client_cart_guest';
+  }
+
+  /// Charge le panier de l'utilisateur actuellement connecté
+  Future<void> loadCart() async {
+    try {
+      final key = await _getCartKey();
+      final prefs = await SharedPreferences.getInstance();
+      final cartStr = prefs.getString(key);
+      if (cartStr != null && cartStr.isNotEmpty) {
         final List<dynamic> decoded = jsonDecode(cartStr);
-        cartNotifier.value = decoded.map((item) => CartItem.fromJson(item)).toList();
+        cartNotifier.value = decoded
+            .map((item) => CartItem.fromJson(item))
+            .toList();
+      } else {
+        cartNotifier.value = [];
       }
     } catch (e) {
       debugPrint("Erreur de chargement du panier: $e");
+      cartNotifier.value = [];
     }
   }
 
   Future<void> _saveCart() async {
     try {
+      final key = await _getCartKey();
       final prefs = await SharedPreferences.getInstance();
-      final cartStr = jsonEncode(cartNotifier.value.map((item) => item.toJson()).toList());
-      await prefs.setString('client_cart', cartStr);
+      final cartStr = jsonEncode(
+        cartNotifier.value.map((item) => item.toJson()).toList(),
+      );
+      await prefs.setString(key, cartStr);
     } catch (e) {
       debugPrint("Erreur de sauvegarde du panier: $e");
     }
@@ -110,26 +138,30 @@ class CartService {
     required double selectedSidePrice,
   }) {
     final id = "${productId}_$selectedSide";
-    final existingIndex = cartNotifier.value.indexWhere((item) => item.id == id);
+    final existingIndex = cartNotifier.value.indexWhere(
+      (item) => item.id == id,
+    );
 
     final currentItems = List<CartItem>.from(cartNotifier.value);
 
     if (existingIndex >= 0) {
       currentItems[existingIndex].quantity += quantity;
     } else {
-      currentItems.add(CartItem(
-        id: id,
-        productId: productId,
-        shopId: shopId,
-        productName: productName,
-        productPrice: productPrice,
-        productPhotoUrl: productPhotoUrl,
-        productEmoji: productEmoji,
-        shopName: shopName,
-        quantity: quantity,
-        selectedSide: selectedSide,
-        selectedSidePrice: selectedSidePrice,
-      ));
+      currentItems.add(
+        CartItem(
+          id: id,
+          productId: productId,
+          shopId: shopId,
+          productName: productName,
+          productPrice: productPrice,
+          productPhotoUrl: productPhotoUrl,
+          productEmoji: productEmoji,
+          shopName: shopName,
+          quantity: quantity,
+          selectedSide: selectedSide,
+          selectedSidePrice: selectedSidePrice,
+        ),
+      );
     }
 
     cartNotifier.value = currentItems;

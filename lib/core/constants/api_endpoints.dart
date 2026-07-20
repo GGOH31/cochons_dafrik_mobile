@@ -24,6 +24,8 @@ class VendeurEndPoints {
   static const String personalInfo = '${ApiBase.baseUrlV1}vendeur/profile/personal';
   static const String shopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
   static const String updateShopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
+  static const String orders = '${ApiBase.baseUrlV1}vendeur/orders';
+  static const String dashboard = '${ApiBase.baseUrlV1}vendeur/dashboard';
 }
 
 class ClientEndPoints {

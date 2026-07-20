@@ -283,4 +283,103 @@ class VendeurService extends BaseService {
       rethrow;
     }
   }
+
+  /// Récupérer les commandes reçues par la boutique (optionnellement filtrées par statut)
+  Future<List<dynamic>> getOrders({String? status}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (status != null && status.isNotEmpty) {
+        queryParams['status'] = status;
+      }
+      final res = await getAll(
+        VendeurEndPoints.orders,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (res['success'] == true) {
+        if (res['data'] is List) {
+          return res['data'] as List<dynamic>;
+        } else if (res['data'] is Map && res['data']['data'] is List) {
+          return res['data']['data'] as List<dynamic>;
+        }
+        return [];
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des commandes');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Accepter une commande
+  Future<Map<String, dynamic>> acceptOrder(String orderId) async {
+    try {
+      final res = await create('${VendeurEndPoints.orders}/$orderId/accept', {});
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de l\'acceptation de la commande');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Refuser une commande
+  Future<Map<String, dynamic>> refuseOrder(String orderId) async {
+    try {
+      final res = await create('${VendeurEndPoints.orders}/$orderId/refuse', {});
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du refus de la commande');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les détails d'une commande (côté vendeur)
+  Future<Map<String, dynamic>> getOrderDetails(String orderId) async {
+    try {
+      final res = await getOne(VendeurEndPoints.orders, id: orderId);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la récupération de la commande');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Mettre à jour le statut de préparation/livraison d'une commande
+  Future<Map<String, dynamic>> updateOrderStatus(String orderId, String status) async {
+    try {
+      final res = await updateWithFormData(
+        '${VendeurEndPoints.orders}/$orderId/status',
+        {'status': status},
+      );
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du changement de statut');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les données du tableau de bord du vendeur
+  Future<Map<String, dynamic>> getDashboard() async {
+    try {
+      final res = await getOne(VendeurEndPoints.dashboard);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement du tableau de bord');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

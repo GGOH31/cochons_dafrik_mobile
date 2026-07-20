@@ -7,10 +7,21 @@ import 'package:cochons_dafrik_mobile/presentation/features/client/domains/servi
 import 'package:cochons_dafrik_mobile/presentation/features/client/paiements/pages/paiement_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 
-class PanierPage extends StatelessWidget {
+class PanierPage extends StatefulWidget {
   final VoidCallback? onDiscoverTap;
 
   const PanierPage({super.key, this.onDiscoverTap});
+
+  @override
+  State<PanierPage> createState() => _PanierPageState();
+}
+
+class _PanierPageState extends State<PanierPage> {
+  @override
+  void initState() {
+    super.initState();
+    CartService.instance.loadCart();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +128,7 @@ class PanierPage extends StatelessWidget {
           const SizedBox(height: 24),
           CdaElevatedButton(
             text: "Faire mes achats",
-            onPressed: onDiscoverTap,
+            onPressed: widget.onDiscoverTap,
             backgroundColor: CdaColors.vertForet,
             foregroundColor: Colors.white,
             width: 200,

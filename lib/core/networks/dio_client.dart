@@ -83,9 +83,9 @@ class DioClient {
     storeToken(token);
   }
 
-  void removeAuthToken() {
+  Future<void> removeAuthToken() async {
     dio.options.headers.remove('Authorization');
-    _removeStoredToken();
+    await _removeStoredToken();
   }
 
   bool hasToken() {
@@ -145,7 +145,11 @@ class DioClient {
   Future<void> _removeStoredToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
+      await prefs.remove(_tokenKey);
+      await prefs.remove('user');
+      await prefs.remove('role');
+      await prefs.remove('shop_id');
+      dio.options.headers['Authorization'] = null;
     } catch (e) {
       print('❌ Erreur lors de la suppression du token: $e');
     }

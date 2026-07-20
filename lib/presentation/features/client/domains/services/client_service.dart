@@ -181,4 +181,58 @@ class ClientService extends BaseService {
       rethrow;
     }
   }
+
+  /// Récupérer la liste des commandes du client (optionnellement filtrées par statut)
+  Future<List<dynamic>> getOrders({String? status}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (status != null && status.isNotEmpty) {
+        queryParams['status'] = status;
+      }
+      final res = await getAll(
+        ClientEndPoints.orders,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (res['success'] == true) {
+        if (res['data'] is List) {
+          return res['data'] as List<dynamic>;
+        } else if (res['data'] is Map && res['data']['data'] is List) {
+          return res['data']['data'] as List<dynamic>;
+        }
+        return [];
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des commandes');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Récupérer les détails d'une commande
+  Future<Map<String, dynamic>> getOrderDetails(String orderId) async {
+    try {
+      final res = await getOne(ClientEndPoints.orders, id: orderId);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la récupération de la commande');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Confirmer la réception d'une commande
+  Future<Map<String, dynamic>> confirmReception(String orderId) async {
+    try {
+      final res = await create('${ClientEndPoints.orders}/$orderId/confirm', {});
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la confirmation de réception');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

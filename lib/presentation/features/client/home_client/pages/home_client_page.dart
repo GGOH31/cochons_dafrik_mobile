@@ -43,6 +43,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
     _loadUserName();
     _determinePosition();
     _fetchShops();
+    CartService.instance.loadCart();
   }
 
   @override
