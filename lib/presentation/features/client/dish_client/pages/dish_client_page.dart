@@ -187,7 +187,7 @@ class _DishClientPageState extends State<DishClientPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                "Sélection un plats",
+                "Sélectionne un plat",
                 style: GoogleFonts.fredoka(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

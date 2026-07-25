@@ -235,4 +235,18 @@ class ClientService extends BaseService {
       rethrow;
     }
   }
+
+  /// Soumettre un avis sur une commande
+  Future<Map<String, dynamic>> submitReview(String orderId, Map<String, dynamic> data) async {
+    try {
+      final res = await create('${ClientEndPoints.orders}/$orderId/review', data);
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(res['message'] ?? 'Erreur lors de la soumission de l\'avis');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

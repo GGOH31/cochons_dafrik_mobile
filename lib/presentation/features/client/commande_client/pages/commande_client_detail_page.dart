@@ -24,6 +24,10 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
   String? _errorMessage;
   Map<String, dynamic>? _order;
 
+  int _rating = 5;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSubmittingReview = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +36,12 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
       _isLoading = false;
     }
     _fetchOrderDetails();
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchOrderDetails() async {
@@ -80,6 +90,48 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
             backgroundColor: CdaColors.rouge,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _submitReview() async {
+    if (_rating < 1 || _rating > 5) return;
+
+    setState(() {
+      _isSubmittingReview = true;
+    });
+
+    try {
+      final data = {
+        'rating': _rating,
+        if (_commentController.text.trim().isNotEmpty)
+          'comment': _commentController.text.trim(),
+      };
+      await _clientService.submitReview(widget.orderId, data);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Avis envoyé avec succès ! Merci."),
+            backgroundColor: CdaColors.vertForet,
+          ),
+        );
+        _fetchOrderDetails();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: CdaColors.rouge,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingReview = false;
+        });
       }
     }
   }
@@ -449,8 +501,157 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
             ),
             const SizedBox(height: 24),
           ],
+          if ((status == 'delivered' || status == 'completed') &&
+              order['review'] == null) ...[
+            _buildReviewForm(),
+            const SizedBox(height: 24),
+          ],
+          if (order['review'] != null) ...[
+            _buildReviewDisplay(order['review']),
+            const SizedBox(height: 24),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildReviewDisplay(Map<String, dynamic> review) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCardTitle("Votre avis"),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: CdaColors.ligne),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: List.generate(5, (index) {
+                  return Icon(
+                    index < (review['rating'] ?? 5)
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: Colors.amber,
+                    size: 24,
+                  );
+                }),
+              ),
+              if (review['comment'] != null &&
+                  review['comment'].isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  review['comment'],
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: CdaColors.encre,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCardTitle("Laisser un avis"),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: CdaColors.ligne),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Notez votre expérience avec le restaurant :",
+                style: GoogleFonts.nunito(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: CdaColors.encre,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < _rating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 36,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _rating = index + 1;
+                      });
+                    },
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _commentController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: "Laissez un commentaire (optionnel)...",
+                  hintStyle: GoogleFonts.nunito(color: CdaColors.gris),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: CdaColors.ligne),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: CdaColors.vertForet),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isSubmittingReview ? null : _submitReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CdaColors.vertForet,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isSubmittingReview
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Envoyer mon avis",
+                          style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
