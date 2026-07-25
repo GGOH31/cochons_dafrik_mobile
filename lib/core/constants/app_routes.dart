@@ -7,7 +7,7 @@ class AppRoutes {
   static const verifyOtp = '/verifyOtp';
   static const homeClient = '/homeClient';
   static const productClient = '/productClient';
-  static const shops = '/shops';
+  static const restaurants = '/restaurants';
   static const productDetail = '/productDetail';
   static const homeVendeur = '/homeVendeur';
   static const forgetPassword = '/forgetPassword';

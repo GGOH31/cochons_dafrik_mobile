@@ -757,16 +757,16 @@ class _PaiementPageState extends State<PaiementPage> {
                 try {
                   // 1. Create order payload
                   final firstItem = cartItems.first;
-                  final shopId = firstItem.shopId;
+                  final restaurantId = firstItem.restaurantId;
 
                   final Map<String, dynamic> orderData = {
-                    'shop_id': shopId,
+                    'restaurant_id': restaurantId,
                     'order_type': 'b2c',
                     'delivery_mode': 'delivery',
                     'address_id': _selectedAddress!['id'],
                     'items': cartItems.map((item) {
                       return {
-                        'product_id': item.productId,
+                        'dish_id': item.dishId,
                         'quantity': item.quantity,
                         'options':
                             item.selectedSide != 'Sans accompagnement' &&

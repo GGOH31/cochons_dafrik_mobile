@@ -169,7 +169,7 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
     }
     final List<String> parts = [];
     for (var item in items) {
-      final name = item['product_name'] ?? item['product']?['name'] ?? 'Article';
+      final name = item['product_name'] ?? item['dish']?['name'] ?? 'Article';
       final qty = item['quantity'] ?? 1;
       parts.add("${qty}× $name");
     }
@@ -329,7 +329,7 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
         final customerName = buyer?['full_name'] ?? 'Client';
         final details = _formatItemsDetails(order['items']);
         final address = order['address'] as Map<String, dynamic>?;
-        final commune = address?['commune'] ?? order['shop']?['commune'] ?? 'Abidjan';
+        final commune = address?['commune'] ?? order['restaurant']?['commune'] ?? 'Abidjan';
         final price = "${order['total_fcfa'] ?? 0} F";
 
         final String status = order['status'] ?? '';

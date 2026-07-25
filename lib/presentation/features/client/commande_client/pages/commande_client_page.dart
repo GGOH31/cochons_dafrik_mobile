@@ -124,12 +124,12 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
 
   String _formatItems(dynamic items) {
     if (items == null || items is! List || items.isEmpty) {
-      return "Commande de produits";
+      return "Commande de dishes";
     }
     final List<String> parts = [];
     for (var item in items) {
       final name =
-          item['product_name'] ?? item['product']?['name'] ?? 'Produit';
+          item['product_name'] ?? item['dish']?['name'] ?? 'Dish';
       final qty = item['quantity'] ?? 1;
       parts.add("${qty}× $name");
     }
@@ -307,7 +307,7 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
                       ),
                     ),
                     child: Text(
-                      "Découvrir les boutiques",
+                      "Découvrir les restaurants",
                       style: GoogleFonts.nunito(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -327,8 +327,8 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final order = _orders[index] as Map<String, dynamic>;
-        final shop = order['shop'] as Map<String, dynamic>?;
-        final shopName = shop?['name'] ?? 'Boutique';
+        final restaurant = order['restaurant'] as Map<String, dynamic>?;
+        final restaurantName = restaurant?['name'] ?? 'Restaurant';
         final reference = "#${order['reference'] ?? order['id'] ?? ''}";
         final statusCfg = _getStatusConfig(order['status']);
         final itemsDetails = _formatItems(order['items']);
@@ -368,7 +368,7 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      shopName,
+                      restaurantName,
                       style: GoogleFonts.fredoka(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

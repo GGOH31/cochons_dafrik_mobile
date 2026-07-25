@@ -33,15 +33,15 @@ class _ProfilVendeurPageState extends State<ProfilVendeurPage> {
       if (userString != null) {
         final Map<String, dynamic> user = jsonDecode(userString);
         final fullName = user['full_name'];
-        final shop = user['shop'];
+        final restaurant = user['restaurant'];
         setState(() {
           if (fullName != null && fullName.toString().trim().isNotEmpty) {
             _userName = fullName.toString();
           }
-          if (shop != null) {
-            _shopName = shop['name']?.toString() ?? '';
-            final commune = shop['commune']?.toString();
-            final address = shop['address']?.toString();
+          if (restaurant != null) {
+            _shopName = restaurant['name']?.toString() ?? '';
+            final commune = restaurant['commune']?.toString();
+            final address = restaurant['address']?.toString();
             if (commune != null &&
                 address != null &&
                 commune.isNotEmpty &&
@@ -119,7 +119,7 @@ class _ProfilVendeurPageState extends State<ProfilVendeurPage> {
               // Options
               _buildOption(
                 icon: LucideIcons.store,
-                title: "Paramètres de la Boutique",
+                title: "Paramètres de la Restaurant",
                 subtitle: "Nom, horaires, statut ouvert/fermé",
                 onTap: () {
                   Navigator.pushNamed(context, AppRoutes.infosBoutique).then((

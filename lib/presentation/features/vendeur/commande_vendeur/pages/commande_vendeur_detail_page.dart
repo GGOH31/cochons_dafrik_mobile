@@ -254,7 +254,7 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
     final buyerPhone = buyer?['phone'] ?? 'N/A';
 
     final address = order['address'] as Map<String, dynamic>?;
-    final commune = address?['commune'] ?? order['shop']?['commune'] ?? 'Non spécifiée';
+    final commune = address?['commune'] ?? order['restaurant']?['commune'] ?? 'Non spécifiée';
     final detailsAddress = address?['details'] ?? 'Livraison standard';
 
     final items = (order['items'] as List<dynamic>?) ?? [];
@@ -283,14 +283,18 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      reference,
-                      style: GoogleFonts.fredoka(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: CdaColors.encre,
+                    Expanded(
+                      child: Text(
+                        reference,
+                        style: GoogleFonts.fredoka(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: CdaColors.encre,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -359,7 +363,7 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          "${items[i]['quantity'] ?? 1}× ${items[i]['product_name'] ?? items[i]['product']?['name'] ?? 'Article'}",
+                          "${items[i]['quantity'] ?? 1}× ${items[i]['dish_name'] ?? items[i]['dish']?['name'] ?? 'Article'}",
                           style: GoogleFonts.nunito(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -368,7 +372,7 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                         ),
                       ),
                       Text(
-                        "${items[i]['total_price_fcfa'] ?? 0} F",
+                        "${items[i]['line_total_fcfa'] ?? 0} F",
                         style: GoogleFonts.nunito(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -474,19 +478,27 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
               ),
             ),
           ] else if (status == 'delivering') ...[
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _updateStatus('delivered'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  "Marquer comme Livrée",
-                  style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
-                ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Color(0xFF16A34A)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Le livreur est en route. En attente de confirmation de réception par le client.",
+                      style: GoogleFonts.nunito(
+                        color: const Color(0xFF166534),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

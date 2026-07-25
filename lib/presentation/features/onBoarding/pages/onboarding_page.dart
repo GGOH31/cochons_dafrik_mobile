@@ -34,7 +34,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     const OnboardingSlide(
       title: "Marché B2C & B2B",
       description:
-          "Que vous soyez un consommateur final ou un restaurant s'approvisionnant chez des grossistes, accédez à des produits frais en quelques clics.",
+          "Que vous soyez un consommateur final ou un restaurant s'approvisionnant chez des grossistes, accédez à des dishes frais en quelques clics.",
       icon: Icons.business_center_outlined,
     ),
   ];

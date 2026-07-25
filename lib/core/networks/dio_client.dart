@@ -5,6 +5,8 @@ import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:cochons_dafrik_mobile/main.dart';
+import '../constants/app_routes.dart';
 import '../constants/api_endpoints.dart';
 
 class DioClient {
@@ -44,10 +46,10 @@ class DioClient {
   void disableSSL() {
     (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
         (client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        };
   }
 
   // =========================
@@ -148,7 +150,7 @@ class DioClient {
       await prefs.remove(_tokenKey);
       await prefs.remove('user');
       await prefs.remove('role');
-      await prefs.remove('shop_id');
+      await prefs.remove('restaurant_id');
       dio.options.headers['Authorization'] = null;
     } catch (e) {
       print('❌ Erreur lors de la suppression du token: $e');
@@ -173,8 +175,12 @@ class DioClient {
           return handler.next(response);
         },
         onError: (DioException e, handler) {
-          if (e.response?.statusCode == 401 || e.response?.statusCode == 500) {
+          if (e.response?.statusCode == 401) {
             removeAuthToken();
+            navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              AppRoutes.login,
+              (route) => false,
+            );
           }
           return handler.next(e);
         },

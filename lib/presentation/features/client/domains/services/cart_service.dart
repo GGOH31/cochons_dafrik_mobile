@@ -3,27 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartItem {
-  final String id; // unique cart item id (e.g. productId + selectedSide)
-  final String productId;
-  final String shopId;
+  final String id; // unique cart item id (e.g. dishId + selectedSide)
+  final String dishId;
+  final String restaurantId;
   final String productName;
   final double productPrice;
   final String? productPhotoUrl;
   final String productEmoji;
-  final String shopName;
+  final String restaurantName;
   int quantity;
   final String selectedSide;
   final double selectedSidePrice;
 
   CartItem({
     required this.id,
-    required this.productId,
-    required this.shopId,
+    required this.dishId,
+    required this.restaurantId,
     required this.productName,
     required this.productPrice,
     this.productPhotoUrl,
     required this.productEmoji,
-    required this.shopName,
+    required this.restaurantName,
     required this.quantity,
     required this.selectedSide,
     required this.selectedSidePrice,
@@ -32,13 +32,13 @@ class CartItem {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'productId': productId,
-      'shopId': shopId,
+      'dishId': dishId,
+      'restaurantId': restaurantId,
       'productName': productName,
       'productPrice': productPrice,
       'productPhotoUrl': productPhotoUrl,
       'productEmoji': productEmoji,
-      'shopName': shopName,
+      'restaurantName': restaurantName,
       'quantity': quantity,
       'selectedSide': selectedSide,
       'selectedSidePrice': selectedSidePrice,
@@ -48,13 +48,13 @@ class CartItem {
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
       id: json['id'],
-      productId: json['productId'],
-      shopId: json['shopId'] ?? '',
+      dishId: json['dishId'],
+      restaurantId: json['restaurantId'] ?? '',
       productName: json['productName'],
       productPrice: (json['productPrice'] as num).toDouble(),
       productPhotoUrl: json['productPhotoUrl'],
       productEmoji: json['productEmoji'] ?? '🍖',
-      shopName: json['shopName'] ?? '',
+      restaurantName: json['restaurantName'] ?? '',
       quantity: json['quantity'] as int,
       selectedSide: json['selectedSide'] ?? '',
       selectedSidePrice: (json['selectedSidePrice'] as num).toDouble(),
@@ -126,18 +126,26 @@ class CartService {
   }
 
   void addToCart({
-    required String productId,
-    required String shopId,
+    required String dishId,
+    required String restaurantId,
     required String productName,
     required double productPrice,
     String? productPhotoUrl,
     required String productEmoji,
-    required String shopName,
+    required String restaurantName,
     required int quantity,
     required String selectedSide,
     required double selectedSidePrice,
   }) {
-    final id = "${productId}_$selectedSide";
+    if (cartNotifier.value.isNotEmpty) {
+      if (cartNotifier.value.first.restaurantId != restaurantId) {
+        throw Exception(
+          "Vous ne pouvez commander qu'auprès d'un seul restaurant à la fois. Veuillez vider votre panier actuel pour commander dans ce nouveau restaurant.",
+        );
+      }
+    }
+
+    final id = "${dishId}_$selectedSide";
     final existingIndex = cartNotifier.value.indexWhere(
       (item) => item.id == id,
     );
@@ -150,13 +158,13 @@ class CartService {
       currentItems.add(
         CartItem(
           id: id,
-          productId: productId,
-          shopId: shopId,
+          dishId: dishId,
+          restaurantId: restaurantId,
           productName: productName,
           productPrice: productPrice,
           productPhotoUrl: productPhotoUrl,
           productEmoji: productEmoji,
-          shopName: shopName,
+          restaurantName: restaurantName,
           quantity: quantity,
           selectedSide: selectedSide,
           selectedSidePrice: selectedSidePrice,

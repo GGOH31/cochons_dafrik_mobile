@@ -6,14 +6,14 @@ import 'package:cochons_dafrik_mobile/presentation/common/quantity_selector_comm
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 
-class ProductDetailPage extends StatefulWidget {
-  const ProductDetailPage({super.key});
+class DishDetailPage extends StatefulWidget {
+  const DishDetailPage({super.key});
 
   @override
-  State<ProductDetailPage> createState() => _ProductDetailPageState();
+  State<DishDetailPage> createState() => _DishDetailPageState();
 }
 
-class _ProductDetailPageState extends State<ProductDetailPage> {
+class _DishDetailPageState extends State<DishDetailPage> {
   int _quantity = 1;
   Map<String, dynamic>? _selectedSideMap;
   bool _isInit = true;
@@ -22,14 +22,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      final product = ModalRoute.of(context)!.settings.arguments as Produit;
-      if (product.accompaniments.isNotEmpty) {
-        _selectedSideMap = Map<String, dynamic>.from(
-          product.accompaniments.first,
-        );
-      } else {
-        _selectedSideMap = null;
-      }
+      _selectedSideMap = null;
       _isInit = false;
     }
   }
@@ -52,7 +45,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedSideMap = acc;
+          if (isSelected) {
+            _selectedSideMap = null;
+          } else {
+            _selectedSideMap = acc;
+          }
         });
       },
       child: Container(
@@ -79,23 +76,23 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final product = ModalRoute.of(context)!.settings.arguments as Produit;
+    final dish = ModalRoute.of(context)!.settings.arguments as Dish;
 
-    // Generate background pastel color based on product ID
+    // Generate background pastel color based on dish ID
     final List<Color> bgColors = [
       const Color(0xFFFFF0EA), // light orange
       const Color(0xFFE8F5E9), // light green
       const Color(0xFFFCE4EC), // light pink
       const Color(0xFFFFFDE7), // light yellow
     ];
-    final int colorIndex = product.id.hashCode % bgColors.length;
+    final int colorIndex = dish.id.hashCode % bgColors.length;
     final Color bgColor = bgColors[colorIndex];
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
       appBar: AppBar(
         title: Text(
-          "Détails du Produit",
+          "Détails du Dish",
           style: GoogleFonts.fredoka(
             fontWeight: FontWeight.bold,
             color: CdaColors.encre,
@@ -118,7 +115,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  // Large Product Display Section
+                  // Large Dish Display Section
                   Center(
                     child: Container(
                       height: 220,
@@ -135,19 +132,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ],
                       ),
                       child:
-                          product.photoUrl != null &&
-                              product.photoUrl!.isNotEmpty
+                          dish.photoUrl != null &&
+                              dish.photoUrl!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(24),
                               child: Image.network(
-                                product.photoUrl!,
+                                dish.photoUrl!,
                                 width: double.infinity,
                                 height: 220,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
                                     Center(
                                       child: Text(
-                                        product.emoji,
+                                        dish.emoji,
                                         style: const TextStyle(fontSize: 100),
                                       ),
                                     ),
@@ -155,7 +152,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             )
                           : Center(
                               child: Text(
-                                product.emoji,
+                                dish.emoji,
                                 style: const TextStyle(fontSize: 100),
                               ),
                             ),
@@ -163,9 +160,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Product Name
+                  // Dish Name
                   Text(
-                    product.name,
+                    dish.name,
                     style: GoogleFonts.fredoka(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -202,7 +199,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "${product.rating.toStringAsFixed(1)} (${product.ratingCount} avis)",
+                              "${dish.rating.toStringAsFixed(1)} (${dish.ratingCount} avis)",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF4CAF50),
@@ -235,8 +232,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              product.prepMinutes != null
-                                  ? "Prêt en ${product.prepMinutes} min"
+                              dish.prepMinutes != null
+                                  ? "Prêt en ${dish.prepMinutes} min"
                                   : "Prêt en 15 min",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
@@ -270,7 +267,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "${product.shopLocation} · 2,1 km",
+                              "${dish.restaurantLocation} · 2,1 km",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF8D7A68),
@@ -280,6 +277,74 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ],
                         ),
                       ),
+                      if (dish.deliveryFeeFcfa != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE3F2FD),
+                            border: Border.all(
+                              color: const Color(0xFF90CAF9),
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.delivery_dining,
+                                color: Color(0xFF1976D2),
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Livraison: ${dish.deliveryFeeFcfa} F",
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1976D2),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (dish.deliveryZone != null && dish.deliveryZone!.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3E5F5),
+                            border: Border.all(
+                              color: const Color(0xFFCE93D8),
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.map,
+                                color: Color(0xFF7B1FA2),
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Zone: ${dish.deliveryZone}",
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF7B1FA2),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -295,13 +360,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       children: [
                         TextSpan(
                           text:
-                              (product.description != null &&
-                                  product.description!.isNotEmpty)
-                              ? "${product.description}. Vendu par "
+                              (dish.description != null &&
+                                  dish.description!.isNotEmpty)
+                              ? "${dish.description}. Vendu par "
                               : "Porc braisé au feu de bois, mariné aux épices maison. Vendu par ",
                         ),
                         TextSpan(
-                          text: product.shopName,
+                          text: dish.restaurantName,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: CdaColors.vertForet,
@@ -314,7 +379,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   const SizedBox(height: 24),
 
                   // Accompagnement Section
-                  if (product.accompaniments.isNotEmpty) ...[
+                  if (dish.accompaniments.isNotEmpty) ...[
                     Text(
                       "Accompagnement",
                       style: GoogleFonts.fredoka(
@@ -327,7 +392,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: product.accompaniments.map((acc) {
+                      children: dish.accompaniments.map((acc) {
                         return _buildSideChip(acc as Map<String, dynamic>);
                       }).toList(),
                     ),
@@ -385,28 +450,76 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ?.toDouble() ??
                           0.0;
 
-                      CartService.instance.addToCart(
-                        productId: product.id,
-                        shopId: product.shopId,
-                        productName: product.name,
-                        productPrice: product.price,
-                        productPhotoUrl: product.photoUrl,
-                        productEmoji: product.emoji,
-                        shopName: product.shopName,
-                        quantity: _quantity,
-                        selectedSide: accName,
-                        selectedSidePrice: accPrice,
-                      );
+                      try {
+                        CartService.instance.addToCart(
+                          dishId: dish.id,
+                          restaurantId: dish.restaurantId,
+                          productName: dish.name,
+                          productPrice: dish.price,
+                          productPhotoUrl: dish.photoUrl,
+                          productEmoji: dish.emoji,
+                          restaurantName: dish.restaurantName,
+                          quantity: _quantity,
+                          selectedSide: accName,
+                          selectedSidePrice: accPrice,
+                        );
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "${product.name} (x$_quantity) avec $accName ajouté au panier !",
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "${dish.name} (x$_quantity) avec $accName ajouté au panier !",
+                            ),
+                            backgroundColor: CdaColors.vertForet,
                           ),
-                          backgroundColor: CdaColors.vertForet,
-                        ),
-                      );
-                      Navigator.pop(context);
+                        );
+                        Navigator.pop(context);
+                      } catch (e) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(
+                              "Restaurant différent",
+                              style: GoogleFonts.fredoka(
+                                color: CdaColors.rouge,
+                              ),
+                            ),
+                            content: Text(
+                              e.toString().replaceAll("Exception: ", ""),
+                              style: GoogleFonts.nunito(),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  "Annuler",
+                                  style: GoogleFonts.nunito(
+                                    color: CdaColors.gris,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  CartService.instance.clearCart();
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Panier vidé. Vous pouvez maintenant ajouter ce plat."),
+                                      backgroundColor: CdaColors.vertForet,
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "Vider le panier",
+                                  style: GoogleFonts.nunito(
+                                    color: CdaColors.rouge,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -420,7 +533,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ),
                         Text(
-                          "${_calculateTotalPrice(product.price).toInt()} F",
+                          "${_calculateTotalPrice(dish.price).toInt()} F",
                           style: GoogleFonts.nunito(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

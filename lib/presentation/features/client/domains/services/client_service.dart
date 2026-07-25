@@ -2,20 +2,20 @@ import 'package:cochons_dafrik_mobile/core/constants/api_endpoints.dart';
 import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
 
 class ClientService extends BaseService {
-  /// Récupérer la liste des boutiques
-  Future<List<dynamic>> getShops({
+  /// Récupérer la liste des restaurants
+  Future<List<dynamic>> getRestaurants({
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
       final res = await getAll(
-        ClientEndPoints.shops,
+        ClientEndPoints.restaurants,
         queryParameters: queryParameters,
       );
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
         throw Exception(
-          res['message'] ?? 'Erreur lors du chargement des boutiques',
+          res['message'] ?? 'Erreur lors du chargement des restaurants',
         );
       }
     } catch (e) {
@@ -23,14 +23,14 @@ class ClientService extends BaseService {
     }
   }
 
-  /// Récupérer les produits d'une boutique spécifique
-  Future<List<dynamic>> getShopProducts(
-    String shopId, {
+  /// Récupérer les dishes d'une restaurant spécifique
+  Future<List<dynamic>> getRestaurantDishes(
+    String restaurantId, {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
       final res = await getAll(
-        '${ClientEndPoints.shops}/$shopId/products',
+        '${ClientEndPoints.restaurants}/$restaurantId/dishes',
         queryParameters: queryParameters,
       );
       if (res['success'] == true) {
@@ -38,7 +38,7 @@ class ClientService extends BaseService {
       } else {
         throw Exception(
           res['message'] ??
-              'Erreur lors du chargement des produits de la boutique',
+              'Erreur lors du chargement des dishes de la restaurant',
         );
       }
     } catch (e) {
@@ -46,18 +46,18 @@ class ClientService extends BaseService {
     }
   }
 
-  /// Rechercher des produits par leur nom (quel que soit la boutique)
-  Future<List<dynamic>> searchProducts(String name) async {
+  /// Rechercher des dishes par leur nom (quel que soit la restaurant)
+  Future<List<dynamic>> searchDishes(String name) async {
     try {
       final res = await getAll(
-        ClientEndPoints.searchProducts,
+        ClientEndPoints.searchDishes,
         queryParameters: {'name': name},
       );
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
         throw Exception(
-          res['message'] ?? 'Erreur lors de la recherche des produits',
+          res['message'] ?? 'Erreur lors de la recherche des dishes',
         );
       }
     } catch (e) {

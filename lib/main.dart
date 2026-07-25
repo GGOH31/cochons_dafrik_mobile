@@ -3,9 +3,9 @@ import 'package:cochons_dafrik_mobile/core/networks/dio_client.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/login/pages/login_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/register/pages/register_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/home_client/pages/home_client_page.dart';
-import 'package:cochons_dafrik_mobile/presentation/features/client/product_client/pages/product_client_page.dart';
-import 'package:cochons_dafrik_mobile/presentation/features/client/shops/pages/shops_page.dart';
-import 'package:cochons_dafrik_mobile/presentation/features/client/product_detail_client/pages/product_detail_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/dish_client/pages/dish_client_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/restaurants/pages/restaurants_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/dish_detail_client/pages/dish_detail_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/home_vendeur/pages/home_vendeur_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/passwords/forgetPassword/pages/forget_password_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/auth/passwords/resetPassword/pages/reset_password_page.dart';
@@ -15,6 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/themes/app_theme.dart';
 import 'presentation/features/onBoarding/pages/onboarding_page.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: "Cochons d'Afrik",
       debugShowCheckedModeBanner: false,
       theme: cdaTheme(),
@@ -62,9 +66,9 @@ class MyApp extends StatelessWidget {
         AppRoutes.login: (context) => const LoginPage(),
         AppRoutes.register: (context) => const RegisterPage(),
         AppRoutes.homeClient: (context) => const HomeClientPage(),
-        AppRoutes.productClient: (context) => const ProductClientPage(),
-        AppRoutes.shops: (context) => const ShopsPage(),
-        AppRoutes.productDetail: (context) => const ProductDetailPage(),
+        AppRoutes.productClient: (context) => const DishClientPage(),
+        AppRoutes.restaurants: (context) => const RestaurantsPage(),
+        AppRoutes.productDetail: (context) => const DishDetailPage(),
         AppRoutes.homeVendeur: (context) => const HomeVendeurPage(),
         AppRoutes.forgetPassword: (context) => const ForgetPasswordPage(),
         AppRoutes.resetPassword: (context) => const ResetPasswordPage(),

@@ -36,7 +36,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
     _valueController = TextEditingController(
       text: widget.initialPromo?["value"]?.toString() ?? "",
     );
-    _selectedProductId = widget.initialPromo?["product_id"]?.toString();
+    _selectedProductId = widget.initialPromo?["dish_id"]?.toString();
     _isActive = widget.initialPromo?["is_active"] ?? true;
 
     final startsAtStr = widget.initialPromo?['starts_at'];
@@ -81,7 +81,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Erreur lors du chargement des produits : $e"),
+            content: Text("Erreur lors du chargement des dishes : $e"),
             backgroundColor: CdaColors.rouge,
           ),
         );
@@ -123,7 +123,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
     if (_selectedProductId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Veuillez sélectionner un produit pour cette promotion."),
+          content: Text("Veuillez sélectionner un dish pour cette promotion."),
           backgroundColor: CdaColors.rouge,
         ),
       );
@@ -145,7 +145,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
     });
 
     final Map<String, dynamic> data = {
-      'product_id': _selectedProductId,
+      'dish_id': _selectedProductId,
       'title': _titleController.text.trim(),
       'promo_type': 'percentage',
       'value': int.tryParse(_valueController.text.trim()) ?? 0,
@@ -302,7 +302,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          "Vous devez d'abord créer au moins un produit pour pouvoir créer des promotions.",
+                          "Vous devez d'abord créer au moins un dish pour pouvoir créer des promotions.",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
                             fontSize: 16,
@@ -361,9 +361,9 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
                             ),
                             const SizedBox(height: 28),
 
-                            // Product Dropdown
+                            // Dish Dropdown
                             Text(
-                              "Associer au produit *",
+                              "Associer au dish *",
                               style: GoogleFonts.fredoka(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -389,7 +389,7 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
                                 color: CdaColors.encre,
                                 fontSize: 15,
                               ),
-                              hint: const Text("Sélectionnez un produit"),
+                              hint: const Text("Sélectionnez un dish"),
                               items: _products.map((prod) {
                                 return DropdownMenuItem<String>(
                                   value: prod['id'].toString(),

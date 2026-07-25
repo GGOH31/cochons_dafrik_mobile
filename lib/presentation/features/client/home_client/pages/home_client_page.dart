@@ -9,8 +9,8 @@ import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/appHeaderBanner_common.dart';
-import 'package:cochons_dafrik_mobile/presentation/common/boutiquue_card_common.dart';
-import 'package:cochons_dafrik_mobile/presentation/common/card_product_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/restaurant_card_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/card_dish_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/commande_client/pages/commande_client_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/profil_client/pages/profil_client_page.dart';
@@ -29,11 +29,11 @@ class _HomeClientPageState extends State<HomeClientPage> {
   String _userName = 'Awa';
   String _locationLabel = "• Cocody, Abidjan";
   final ClientService _clientService = ClientService();
-  List<Boutique> _boutiques = [];
+  List<Restaurant> _restaurants = [];
   bool _isShopsLoading = true;
 
   String _searchQuery = "";
-  List<Produit> _searchResults = [];
+  List<Dish> _searchResults = [];
   bool _isSearchLoading = false;
   final TextEditingController _searchController = TextEditingController();
 
@@ -69,13 +69,13 @@ class _HomeClientPageState extends State<HomeClientPage> {
     });
 
     try {
-      final resultsJson = await _clientService.searchProducts(trimmed);
+      final resultsJson = await _clientService.searchDishes(trimmed);
       setState(() {
         _searchResults = resultsJson.map((p) {
-          final shop = p['shop'] ?? {};
-          final shopName = shop['name'] ?? 'Boutique';
-          final shopLocation = shop['commune'] ?? 'Cocody';
-          return Produit.fromJson(p, shopName, shopLocation: shopLocation);
+          final restaurant = p['restaurant'] ?? {};
+          final restaurantName = restaurant['name'] ?? 'Restaurant';
+          final restaurantLocation = restaurant['commune'] ?? 'Cocody';
+          return Dish.fromJson(p, restaurantName, restaurantLocation: restaurantLocation);
         }).toList();
         _isSearchLoading = false;
       });
@@ -83,7 +83,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
       setState(() {
         _isSearchLoading = false;
       });
-      debugPrint("Erreur lors de la recherche des produits: $e");
+      debugPrint("Erreur lors de la recherche des dishes: $e");
     }
   }
 
@@ -92,16 +92,16 @@ class _HomeClientPageState extends State<HomeClientPage> {
       _isShopsLoading = true;
     });
     try {
-      final shopsJson = await _clientService.getShops();
+      final shopsJson = await _clientService.getRestaurants();
       setState(() {
-        _boutiques = shopsJson.map((s) => Boutique.fromJson(s)).toList();
+        _restaurants = shopsJson.map((s) => Restaurant.fromJson(s)).toList();
         _isShopsLoading = false;
       });
     } catch (e) {
       setState(() {
         _isShopsLoading = false;
       });
-      debugPrint("Erreur lors du chargement des boutiques: $e");
+      debugPrint("Erreur lors du chargement des restaurants: $e");
     }
   }
 
@@ -500,7 +500,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                   vertical: 40.0,
                                 ),
                                 child: Text(
-                                  "Aucun produit trouvé pour \"$_searchQuery\"",
+                                  "Aucun dish trouvé pour \"$_searchQuery\"",
                                   style: GoogleFonts.nunito(
                                     color: CdaColors.gris,
                                     fontSize: 15,
@@ -524,54 +524,102 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                     ),
                                 itemCount: _searchResults.length,
                                 itemBuilder: (context, index) {
-                                  final product = _searchResults[index];
-                                  return CardProductCommon(
-                                    product: product,
+                                  final dish = _searchResults[index];
+                                  return CardDishCommon(
+                                    dish: dish,
                                     onTap: () {
                                       Navigator.pushNamed(
                                         context,
                                         AppRoutes.productDetail,
-                                        arguments: product,
+                                        arguments: dish,
                                       );
                                     },
                                     onAddTap: () {
-                                      CartService.instance.addToCart(
-                                        productId: product.id,
-                                        shopId: product.shopId,
-                                        productName: product.name,
-                                        productPrice: product.price,
-                                        productPhotoUrl: product.photoUrl,
-                                        productEmoji: product.emoji,
-                                        shopName: product.shopName,
-                                        quantity: 1,
-                                        selectedSide:
-                                            product.accompaniments.isNotEmpty
-                                            ? (product
-                                                      .accompaniments
-                                                      .first['name'] ??
-                                                  'Sans accompagnement')
-                                            : 'Sans accompagnement',
-                                        selectedSidePrice:
-                                            product.accompaniments.isNotEmpty
-                                            ? ((product
-                                                              .accompaniments
-                                                              .first['prix_unit']
-                                                          as num?)
-                                                      ?.toDouble() ??
-                                                  0.0)
-                                            : 0.0,
-                                      );
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "${product.name} ajouté au panier !",
+                                      try {
+                                        CartService.instance.addToCart(
+                                          dishId: dish.id,
+                                          restaurantId: dish.restaurantId,
+                                          productName: dish.name,
+                                          productPrice: dish.price,
+                                          productPhotoUrl: dish.photoUrl,
+                                          productEmoji: dish.emoji,
+                                          restaurantName: dish.restaurantName,
+                                          quantity: 1,
+                                          selectedSide:
+                                              dish.accompaniments.isNotEmpty
+                                              ? (dish
+                                                        .accompaniments
+                                                        .first['name'] ??
+                                                    'Sans accompagnement')
+                                              : 'Sans accompagnement',
+                                          selectedSidePrice:
+                                              dish.accompaniments.isNotEmpty
+                                              ? ((dish
+                                                                .accompaniments
+                                                                .first['prix_unit']
+                                                            as num?)
+                                                        ?.toDouble() ??
+                                                    0.0)
+                                              : 0.0,
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "${dish.name} ajouté au panier !",
+                                            ),
+                                            duration: const Duration(seconds: 1),
+                                            backgroundColor: CdaColors.vertForet,
                                           ),
-                                          duration: const Duration(seconds: 1),
-                                          backgroundColor: CdaColors.vertForet,
-                                        ),
-                                      );
+                                        );
+                                      } catch (e) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text(
+                                              "Restaurant différent",
+                                              style: GoogleFonts.fredoka(
+                                                color: CdaColors.rouge,
+                                              ),
+                                            ),
+                                            content: Text(
+                                              e.toString().replaceAll("Exception: ", ""),
+                                              style: GoogleFonts.nunito(),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: Text(
+                                                  "Annuler",
+                                                  style: GoogleFonts.nunito(
+                                                    color: CdaColors.gris,
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  CartService.instance.clearCart();
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("Panier vidé. Vous pouvez maintenant ajouter ce plat."),
+                                                      backgroundColor: CdaColors.vertForet,
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Vider le panier",
+                                                  style: GoogleFonts.nunito(
+                                                    color: CdaColors.rouge,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
                                     },
                                   );
                                 },
@@ -600,7 +648,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                 TextButton(
                                   onPressed: () => Navigator.pushNamed(
                                     context,
-                                    AppRoutes.shops,
+                                    AppRoutes.restaurants,
                                   ),
                                   child: Text(
                                     "Voir tout",
@@ -614,7 +662,7 @@ class _HomeClientPageState extends State<HomeClientPage> {
                               ],
                             ),
                           ),
-                          // Grille des Boutiques
+                          // Grille des Restaurants
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20.0,
@@ -627,10 +675,10 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                       ),
                                     ),
                                   )
-                                : _boutiques.isEmpty
+                                : _restaurants.isEmpty
                                 ? Center(
                                     child: Text(
-                                      "Aucune boutique disponible",
+                                      "Aucune restaurant disponible",
                                       style: GoogleFonts.nunito(
                                         color: CdaColors.gris,
                                         fontSize: 15,
@@ -648,16 +696,16 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                           mainAxisSpacing: 16,
                                           childAspectRatio: 0.85,
                                         ),
-                                    itemCount: _boutiques.length,
+                                    itemCount: _restaurants.length,
                                     itemBuilder: (context, index) {
-                                      final boutique = _boutiques[index];
-                                      return BoutiqueCard(
-                                        boutique: boutique,
+                                      final restaurant = _restaurants[index];
+                                      return RestaurantCard(
+                                        restaurant: restaurant,
                                         onTap: () {
                                           Navigator.pushNamed(
                                             context,
                                             AppRoutes.productClient,
-                                            arguments: boutique,
+                                            arguments: restaurant,
                                           );
                                         },
                                       );
@@ -718,8 +766,8 @@ class _HomeClientPageState extends State<HomeClientPage> {
                           const Text("🔥 ", style: TextStyle(fontSize: 16)),
                           Text(
                             _isShopsLoading
-                                ? "Recherche de boutiques..."
-                                : "${_boutiques.length} boutiques ouvertes près de vous",
+                                ? "Recherche de restaurants..."
+                                : "${_restaurants.length} restaurants ouvertes près de vous",
                             style: GoogleFonts.nunito(
                               fontWeight: FontWeight.w800,
                               color: CdaColors.encre,

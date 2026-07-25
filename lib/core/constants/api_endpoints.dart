@@ -18,19 +18,19 @@ class AuthEndPoints {
 
 class VendeurEndPoints {
   static const String categories = '${ApiBase.baseUrlV1}vendeur/categories';
-  static const String products = '${ApiBase.baseUrlV1}vendeur/products';
+  static const String dishes = '${ApiBase.baseUrlV1}vendeur/dishes';
   static const String accompaniments = '${ApiBase.baseUrlV1}vendeur/accompaniments';
   static const String promotions = '${ApiBase.baseUrlV1}vendeur/promotions';
   static const String personalInfo = '${ApiBase.baseUrlV1}vendeur/profile/personal';
-  static const String shopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
-  static const String updateShopInfo = '${ApiBase.baseUrlV1}vendeur/profile/shop';
+  static const String restaurantInfo = '${ApiBase.baseUrlV1}vendeur/profile/restaurant';
+  static const String updateRestaurantInfo = '${ApiBase.baseUrlV1}vendeur/profile/restaurant';
   static const String orders = '${ApiBase.baseUrlV1}vendeur/orders';
   static const String dashboard = '${ApiBase.baseUrlV1}vendeur/dashboard';
 }
 
 class ClientEndPoints {
-  static const String shops = '${ApiBase.baseUrlV1}client/shops';
-  static const String searchProducts = '${ApiBase.baseUrlV1}client/products/search';
+  static const String restaurants = '${ApiBase.baseUrlV1}client/restaurants';
+  static const String searchDishes = '${ApiBase.baseUrlV1}client/dishes/search';
   static const String personalInfo = '${ApiBase.baseUrlV1}client/profile/personal';
   static const String getAddresses = '${ApiBase.baseUrlV1}client/addresses';
   static const String addAddress = '${ApiBase.baseUrlV1}client/addresses';

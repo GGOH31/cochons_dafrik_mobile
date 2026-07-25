@@ -150,14 +150,14 @@ class _PanierPageState extends State<PanierPage> {
               final itemTotal =
                   (item.productPrice + item.selectedSidePrice) * item.quantity;
 
-              // Generate background color based on product ID
+              // Generate background color based on dish ID
               final List<Color> bgColors = [
                 const Color(0xFFFFF0EA),
                 const Color(0xFFE8F5E9),
                 const Color(0xFFFCE4EC),
                 const Color(0xFFFFFDE7),
               ];
-              final int colorIndex = item.productId.hashCode % bgColors.length;
+              final int colorIndex = item.dishId.hashCode % bgColors.length;
               final Color bgColor = bgColors[colorIndex];
 
               return Container(
@@ -226,7 +226,7 @@ class _PanierPageState extends State<PanierPage> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              "Boutique : ${item.shopName}",
+                              "Restaurant : ${item.restaurantName}",
                               style: GoogleFonts.nunito(
                                 fontSize: 12,
                                 color: CdaColors.gris,

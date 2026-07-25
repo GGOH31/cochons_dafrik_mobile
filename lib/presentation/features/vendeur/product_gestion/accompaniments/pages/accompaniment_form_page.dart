@@ -38,7 +38,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
     _priceController = TextEditingController(
       text: widget.initialAccompaniment?["prix_unit"]?.toString() ?? "",
     );
-    _selectedProductId = widget.initialAccompaniment?["product_id"]?.toString();
+    _selectedProductId = widget.initialAccompaniment?["dish_id"]?.toString();
     _loadProducts();
   }
 
@@ -56,7 +56,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
         _products = prods;
         _isProductsLoading = false;
 
-        // If editing and selected product is not empty, ensure it's still in the product list, or fallback
+        // If editing and selected dish is not empty, ensure it's still in the dish list, or fallback
         if (_selectedProductId != null) {
           final exists = prods.any((p) => p['id'].toString() == _selectedProductId);
           if (!exists) {
@@ -71,7 +71,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Erreur lors du chargement des produits : $e"),
+            content: Text("Erreur lors du chargement des dishes : $e"),
             backgroundColor: CdaColors.rouge,
           ),
         );
@@ -85,7 +85,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
     if (_selectedProductId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Veuillez associer cet accompagnement à un produit."),
+          content: Text("Veuillez associer cet accompagnement à un dish."),
           backgroundColor: CdaColors.rouge,
         ),
       );
@@ -97,7 +97,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
     });
 
     final Map<String, dynamic> fields = {
-      'product_id': _selectedProductId,
+      'dish_id': _selectedProductId,
       'name': _nameController.text.trim(),
       'prix_unit': int.tryParse(_priceController.text.trim()) ?? 0,
     };
@@ -265,7 +265,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          "Vous devez d'abord créer au moins un produit pour pouvoir lui ajouter des accompagnements.",
+                          "Vous devez d'abord créer au moins un dish pour pouvoir lui ajouter des accompagnements.",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
                             fontSize: 16,
@@ -360,9 +360,9 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
                               ),
                               const SizedBox(height: 24),
 
-                              // Product Association Dropdown
+                              // Dish Association Dropdown
                               Text(
-                                "Associer au produit *",
+                                "Associer au dish *",
                                 style: GoogleFonts.fredoka(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -388,7 +388,7 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
                                   color: CdaColors.encre,
                                   fontSize: 15,
                                 ),
-                                hint: const Text("Sélectionnez un produit"),
+                                hint: const Text("Sélectionnez un dish"),
                                 items: _products.map((prod) {
                                   return DropdownMenuItem<String>(
                                     value: prod['id'].toString(),

@@ -78,9 +78,9 @@ class _AccompanimentPageState extends State<AccompanimentPage> {
                     itemBuilder: (context, index) {
                       final acc = _accompaniments[index];
                       final price = acc['prix_unit'] ?? 0;
-                      final productName = (acc['product'] != null && acc['product']['name'] != null)
-                          ? acc['product']['name']
-                          : 'Produit inconnu';
+                      final productName = (acc['dish'] != null && acc['dish']['name'] != null)
+                          ? acc['dish']['name']
+                          : 'Dish inconnu';
 
                       return CardProduitVendeurCommon(
                         emoji: '🍱',

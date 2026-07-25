@@ -4,19 +4,19 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
-import 'package:cochons_dafrik_mobile/presentation/common/boutiquue_card_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/restaurant_card_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
 
-class ShopsPage extends StatefulWidget {
-  const ShopsPage({super.key});
+class RestaurantsPage extends StatefulWidget {
+  const RestaurantsPage({super.key});
 
   @override
-  State<ShopsPage> createState() => _ShopsPageState();
+  State<RestaurantsPage> createState() => _RestaurantsPageState();
 }
 
-class _ShopsPageState extends State<ShopsPage> {
+class _RestaurantsPageState extends State<RestaurantsPage> {
   final ClientService _clientService = ClientService();
-  List<Boutique> _boutiques = [];
+  List<Restaurant> _restaurants = [];
   bool _isLoading = true;
   String _searchQuery = "";
 
@@ -31,22 +31,22 @@ class _ShopsPageState extends State<ShopsPage> {
       _isLoading = true;
     });
     try {
-      final shopsJson = await _clientService.getShops();
+      final shopsJson = await _clientService.getRestaurants();
       setState(() {
-        _boutiques = shopsJson.map((s) => Boutique.fromJson(s)).toList();
+        _restaurants = shopsJson.map((s) => Restaurant.fromJson(s)).toList();
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      debugPrint("Erreur lors du chargement des boutiques: $e");
+      debugPrint("Erreur lors du chargement des restaurants: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredShops = _boutiques.where((b) {
+    final filteredShops = _restaurants.where((b) {
       final query = _searchQuery.toLowerCase();
       return b.name.toLowerCase().contains(query) ||
           b.speciality.toLowerCase().contains(query) ||
@@ -57,7 +57,7 @@ class _ShopsPageState extends State<ShopsPage> {
       backgroundColor: CdaColors.creme,
       appBar: AppBar(
         title: Text(
-          "Toutes les Boutiques",
+          "Toutes les Restaurants",
           style: GoogleFonts.fredoka(
             fontWeight: FontWeight.bold,
             color: CdaColors.encre,
@@ -77,7 +77,7 @@ class _ShopsPageState extends State<ShopsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12),
-            // Search Bar for Shops
+            // Search Bar for Restaurants
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -106,7 +106,7 @@ class _ShopsPageState extends State<ShopsPage> {
                     color: CdaColors.gris,
                     size: 20,
                   ),
-                  hintText: "Rechercher une boutique...",
+                  hintText: "Rechercher une restaurant...",
                   hintStyle: GoogleFonts.nunito(
                     color: CdaColors.gris,
                     fontSize: 15,
@@ -126,7 +126,7 @@ class _ShopsPageState extends State<ShopsPage> {
                   : filteredShops.isEmpty
                       ? Center(
                           child: Text(
-                            "Aucune boutique trouvée",
+                            "Aucune restaurant trouvée",
                             style: GoogleFonts.nunito(
                               color: CdaColors.gris,
                               fontSize: 16,
@@ -142,14 +142,14 @@ class _ShopsPageState extends State<ShopsPage> {
                           ),
                           itemCount: filteredShops.length,
                           itemBuilder: (context, index) {
-                            final boutique = filteredShops[index];
-                            return BoutiqueCard(
-                              boutique: boutique,
+                            final restaurant = filteredShops[index];
+                            return RestaurantCard(
+                              restaurant: restaurant,
                               onTap: () {
                                 Navigator.pushNamed(
                                   context,
                                   AppRoutes.productClient,
-                                  arguments: boutique,
+                                  arguments: restaurant,
                                 );
                               },
                             );

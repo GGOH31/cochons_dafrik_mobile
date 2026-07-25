@@ -4,20 +4,20 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cochons_dafrik_mobile/core/models/client_models.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/appHeaderBanner_common.dart';
-import 'package:cochons_dafrik_mobile/presentation/common/card_product_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/card_dish_common.dart';
 import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
 
-class ProductClientPage extends StatefulWidget {
-  const ProductClientPage({super.key});
+class DishClientPage extends StatefulWidget {
+  const DishClientPage({super.key});
 
   @override
-  State<ProductClientPage> createState() => _ProductClientPageState();
+  State<DishClientPage> createState() => _DishClientPageState();
 }
 
-class _ProductClientPageState extends State<ProductClientPage> {
+class _DishClientPageState extends State<DishClientPage> {
   final ClientService _clientService = ClientService();
-  List<Produit> _products = [];
+  List<Dish> _products = [];
   bool _isLoading = true;
   bool _isInit = true;
 
@@ -25,25 +25,28 @@ class _ProductClientPageState extends State<ProductClientPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      final boutique = ModalRoute.of(context)!.settings.arguments as Boutique;
-      _fetchProducts(boutique);
+      final restaurant =
+          ModalRoute.of(context)!.settings.arguments as Restaurant;
+      _fetchProducts(restaurant);
       _isInit = false;
     }
   }
 
-  Future<void> _fetchProducts(Boutique boutique) async {
+  Future<void> _fetchProducts(Restaurant restaurant) async {
     setState(() {
       _isLoading = true;
     });
     try {
-      final productsJson = await _clientService.getShopProducts(boutique.id);
+      final productsJson = await _clientService.getRestaurantDishes(
+        restaurant.id,
+      );
       setState(() {
         _products = productsJson
             .map(
-              (p) => Produit.fromJson(
+              (p) => Dish.fromJson(
                 p,
-                boutique.name,
-                shopLocation: boutique.location,
+                restaurant.name,
+                restaurantLocation: restaurant.location,
               ),
             )
             .toList();
@@ -53,19 +56,19 @@ class _ProductClientPageState extends State<ProductClientPage> {
       setState(() {
         _isLoading = false;
       });
-      debugPrint("Erreur lors du chargement des produits: $e");
+      debugPrint("Erreur lors du chargement des dishes: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final boutique = ModalRoute.of(context)!.settings.arguments as Boutique;
+    final restaurant = ModalRoute.of(context)!.settings.arguments as Restaurant;
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
       appBar: AppBar(
         title: Text(
-          boutique.name,
+          restaurant.name,
           style: GoogleFonts.fredoka(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -82,7 +85,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Shop Details Header Banner
+            // Restaurant Details Header Banner
             AppHeaderBanner(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               child: Column(
@@ -98,19 +101,19 @@ class _ProductClientPageState extends State<ProductClientPage> {
                           shape: BoxShape.circle,
                         ),
                         child:
-                            boutique.logoUrl != null &&
-                                boutique.logoUrl!.isNotEmpty
+                            restaurant.logoUrl != null &&
+                                restaurant.logoUrl!.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(28),
                                 child: Image.network(
-                                  boutique.logoUrl!,
+                                  restaurant.logoUrl!,
                                   width: 56,
                                   height: 56,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Center(
                                         child: Text(
-                                          boutique.emoji,
+                                          restaurant.emoji,
                                           style: const TextStyle(fontSize: 32),
                                         ),
                                       ),
@@ -118,7 +121,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
                               )
                             : Center(
                                 child: Text(
-                                  boutique.emoji,
+                                  restaurant.emoji,
                                   style: const TextStyle(fontSize: 32),
                                 ),
                               ),
@@ -129,7 +132,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              boutique.speciality,
+                              restaurant.speciality,
                               style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -146,7 +149,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  boutique.location,
+                                  restaurant.location,
                                   style: GoogleFonts.nunito(
                                     fontSize: 14,
                                     color: Colors.white70,
@@ -160,7 +163,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  boutique.rating.toString(),
+                                  restaurant.rating.toString(),
                                   style: GoogleFonts.nunito(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -180,11 +183,11 @@ class _ProductClientPageState extends State<ProductClientPage> {
 
             const SizedBox(height: 24),
 
-            // Products section title
+            // Dishes section title
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                "Sélection de produits",
+                "Sélection un plats",
                 style: GoogleFonts.fredoka(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -195,7 +198,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
 
             const SizedBox(height: 12),
 
-            // Product Grid
+            // Dish Grid
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: _isLoading
@@ -214,7 +217,7 @@ class _ProductClientPageState extends State<ProductClientPage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 40.0),
                         child: Text(
-                          "Aucun produit disponible dans cette boutique.",
+                          "Aucun dish disponible dans cette restaurant.",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
                             color: CdaColors.gris,
@@ -235,24 +238,21 @@ class _ProductClientPageState extends State<ProductClientPage> {
                           ),
                       itemCount: _products.length,
                       itemBuilder: (context, index) {
-                        final product = _products[index];
-                        return CardProductCommon(
-                          product: product,
+                        final dish = _products[index];
+                        return CardDishCommon(
+                          dish: dish,
                           onTap: () {
                             Navigator.pushNamed(
                               context,
                               AppRoutes.productDetail,
-                              arguments: product,
+                              arguments: dish,
                             );
                           },
                           onAddTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "${product.name} ajouté au panier !",
-                                ),
-                                duration: const Duration(seconds: 1),
-                              ),
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.productDetail,
+                              arguments: dish,
                             );
                           },
                         );

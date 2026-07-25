@@ -47,7 +47,7 @@ class CardCategorieCommon extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          "$count produit(s)",
+          "$count dish(s)",
           style: GoogleFonts.nunito(
             fontSize: 13,
             color: CdaColors.gris,

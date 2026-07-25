@@ -96,10 +96,10 @@ class _PromotionsPageState extends State<PromotionsPage> {
                         } catch (_) {}
                       }
 
-                      final productName = (promo['product'] != null && promo['product']['name'] != null)
-                          ? promo['product']['name']
-                          : 'Tous les produits';
-                      final details = "$datesInfo • Produit : $productName";
+                      final productName = (promo['dish'] != null && promo['dish']['name'] != null)
+                          ? promo['dish']['name']
+                          : 'Tous les dishes';
+                      final details = "$datesInfo • Dish : $productName";
 
                       final isActive = promo['is_active'] ?? true;
                       final statusLabel = isActive ? "PROMO ACTIVE" : "INACTIVE";

@@ -30,9 +30,9 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
       _errorMessage = null;
     });
     try {
-      final shop = await _vendeurService.getShopInfo();
+      final restaurant = await _vendeurService.getShopInfo();
       setState(() {
-        _shopData = shop;
+        _shopData = restaurant;
         _isLoading = false;
       });
     } catch (e) {
@@ -49,7 +49,7 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
       backgroundColor: CdaColors.creme,
       appBar: AppBar(
         title: Text(
-          "Ma Boutique",
+          "Ma Restaurant",
           style: GoogleFonts.fredoka(
             fontWeight: FontWeight.bold,
             color: CdaColors.encre,
@@ -141,13 +141,13 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
     if (_shopData == null) {
       return Center(
         child: Text(
-          "Aucune boutique trouvée",
+          "Aucune restaurant trouvée",
           style: GoogleFonts.nunito(color: CdaColors.gris),
         ),
       );
     }
 
-    final String name = _shopData!['name'] ?? 'Boutique sans nom';
+    final String name = _shopData!['name'] ?? 'Restaurant sans nom';
     final String description = _shopData!['description'] ?? 'Aucune description fournie.';
     final String commune = _shopData!['commune'] ?? 'Non spécifiée';
     final String address = _shopData!['address'] ?? 'Non spécifiée';
@@ -165,7 +165,7 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Shop Card
+          // Header Restaurant Card
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24.0),
@@ -257,7 +257,7 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
           const SizedBox(height: 24),
 
           Text(
-            "Détails de la Boutique",
+            "Détails de la Restaurant",
             style: GoogleFonts.fredoka(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -319,7 +319,7 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
               ),
               icon: const Icon(LucideIcons.edit3, color: Colors.white),
               label: Text(
-                "Modifier la Boutique",
+                "Modifier la Restaurant",
                 style: GoogleFonts.nunito(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -398,7 +398,7 @@ class _InfosBoutiquePageState extends State<InfosBoutiquePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FormUpdateBoutiquePage(shop: _shopData),
+        builder: (context) => FormUpdateBoutiquePage(restaurant: _shopData),
       ),
     ).then((value) {
       if (value == true) {

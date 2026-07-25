@@ -7,9 +7,9 @@ import 'package:cochons_dafrik_mobile/presentation/common/file_picker_common.dar
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class FormUpdateBoutiquePage extends StatefulWidget {
-  final Map<String, dynamic>? shop;
+  final Map<String, dynamic>? restaurant;
 
-  const FormUpdateBoutiquePage({super.key, this.shop});
+  const FormUpdateBoutiquePage({super.key, this.restaurant});
 
   @override
   State<FormUpdateBoutiquePage> createState() => _FormUpdateBoutiquePageState();
@@ -35,27 +35,27 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
   void initState() {
     super.initState();
     _descController = TextEditingController(
-      text: widget.shop?['description'] ?? '',
+      text: widget.restaurant?['description'] ?? '',
     );
     _addressController = TextEditingController(
-      text: widget.shop?['address'] ?? '',
+      text: widget.restaurant?['address'] ?? '',
     );
     _latController = TextEditingController(
-      text: widget.shop?['latitude']?.toString() ?? '',
+      text: widget.restaurant?['latitude']?.toString() ?? '',
     );
     _lonController = TextEditingController(
-      text: widget.shop?['longitude']?.toString() ?? '',
+      text: widget.restaurant?['longitude']?.toString() ?? '',
     );
     _deliveryFeeController = TextEditingController(
-      text: widget.shop?['delivery_fee_fcfa']?.toString() ?? '',
+      text: widget.restaurant?['delivery_fee_fcfa']?.toString() ?? '',
     );
     _minOrderController = TextEditingController(
-      text: widget.shop?['min_order_fcfa']?.toString() ?? '',
+      text: widget.restaurant?['min_order_fcfa']?.toString() ?? '',
     );
     _deliveryZoneController = TextEditingController(
-      text: widget.shop?['delivery_zone'] ?? '',
+      text: widget.restaurant?['delivery_zone'] ?? '',
     );
-    _isOpen = widget.shop?['is_open'] ?? false;
+    _isOpen = widget.restaurant?['is_open'] ?? false;
   }
 
   @override
@@ -114,7 +114,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Boutique mise à jour avec succès !"),
+            content: Text("Restaurant mise à jour avec succès !"),
             backgroundColor: CdaColors.vertForet,
           ),
         );
@@ -137,13 +137,13 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentLogoUrl = widget.shop?['logo_url'] ?? '';
+    final String currentLogoUrl = widget.restaurant?['logo_url'] ?? '';
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
       appBar: AppBar(
         title: Text(
-          "Modifier la Boutique",
+          "Modifier la Restaurant",
           style: GoogleFonts.fredoka(
             fontWeight: FontWeight.bold,
             color: CdaColors.encre,
@@ -206,7 +206,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
               const SizedBox(height: 24),
 
               // Description
-              _buildLabel("Description de la boutique"),
+              _buildLabel("Description de la restaurant"),
               TextFormField(
                 controller: _descController,
                 maxLines: 3,
@@ -330,7 +330,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Boutique ouverte",
+                            "Restaurant ouverte",
                             style: GoogleFonts.fredoka(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -338,7 +338,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
                             ),
                           ),
                           Text(
-                            "Rendre la boutique visible et prête à recevoir des commandes",
+                            "Rendre la restaurant visible et prête à recevoir des commandes",
                             style: GoogleFonts.nunito(
                               fontSize: 12,
                               color: CdaColors.gris,

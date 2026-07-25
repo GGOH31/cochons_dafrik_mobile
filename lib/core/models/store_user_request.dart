@@ -6,7 +6,7 @@ class StoreUserRequest {
   final String phone;
   final String? email;
   final String password;
-  final StoreShopRequest? shop;
+  final StoreShopRequest? restaurant;
 
   StoreUserRequest({
     required this.role,
@@ -14,7 +14,7 @@ class StoreUserRequest {
     required this.phone,
     this.email,
     required this.password,
-    this.shop,
+    this.restaurant,
   });
 
   Map<String, dynamic> toJson() {
@@ -24,7 +24,7 @@ class StoreUserRequest {
       'phone': phone,
       'email': email,
       'password': password,
-      if (shop != null) 'shop': shop!.toJson(),
+      if (restaurant != null) 'restaurant': restaurant!.toJson(),
     };
   }
 }

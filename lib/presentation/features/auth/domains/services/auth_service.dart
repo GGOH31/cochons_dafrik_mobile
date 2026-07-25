@@ -37,9 +37,9 @@ class AuthService extends BaseService {
           if (role != null) {
             await _dioClient.storeValue('role', role);
           }
-          final shop = user['shop'];
-          if (shop != null && shop['id'] != null) {
-            await _dioClient.storeValue('shop_id', shop['id'].toString());
+          final restaurant = user['restaurant'];
+          if (restaurant != null && restaurant['id'] != null) {
+            await _dioClient.storeValue('restaurant_id', restaurant['id'].toString());
           }
           await CartService.instance.loadCart();
         }
@@ -82,35 +82,35 @@ class AuthService extends BaseService {
     }
   }
 
-  /// Inscrit un nouveau vendeur (avec les détails de sa boutique et justificatifs d'activité).
+  /// Inscrit un nouveau vendeur (avec les détails de sa restaurant et justificatifs d'activité).
   /// Déclenche l'envoi d'un code OTP par SMS.
   Future<Map<String, dynamic>> registerVendeur(StoreUserRequest request) async {
     try {
       final Map<String, dynamic> formFields = request.toJson();
 
-      // Si des détails de boutique sont fournis, nous convertissons le JSON
-      // à plat au format multi-part attendu par Laravel (e.g. shop[name])
-      final shopData = request.shop;
+      // Si des détails de restaurant sont fournis, nous convertissons le JSON
+      // à plat au format multi-part attendu par Laravel (e.g. restaurant[name])
+      final shopData = request.restaurant;
       if (shopData != null) {
-        // Retirer la clé de structure imbriquée 'shop' pour la reconstruire
-        formFields.remove('shop');
+        // Retirer la clé de structure imbriquée 'restaurant' pour la reconstruire
+        formFields.remove('restaurant');
 
-        formFields['shop[name]'] = shopData.name;
-        formFields['shop[commune]'] = shopData.commune;
+        formFields['restaurant[name]'] = shopData.name;
+        formFields['restaurant[commune]'] = shopData.commune;
 
         if (shopData.description != null &&
             shopData.description!.trim().isNotEmpty) {
-          formFields['shop[description]'] = shopData.description;
+          formFields['restaurant[description]'] = shopData.description;
         }
         if (shopData.address != null && shopData.address!.trim().isNotEmpty) {
-          formFields['shop[address]'] = shopData.address;
+          formFields['restaurant[address]'] = shopData.address;
         }
 
         // Ajout du fichier de logo si présent
         if (shopData.logoFilePath != null &&
             shopData.logoFilePath!.isNotEmpty) {
           final logoFileName = shopData.logoFilePath!.split('/').last;
-          formFields['shop[logo_file]'] = await MultipartFile.fromFile(
+          formFields['restaurant[logo_file]'] = await MultipartFile.fromFile(
             shopData.logoFilePath!,
             filename: logoFileName,
           );
@@ -118,7 +118,7 @@ class AuthService extends BaseService {
 
         // Ajout obligatoire du fichier justificatif d'activité
         final docsFileName = shopData.supportingDocsFilePath.split('/').last;
-        formFields['shop[supporting_docs_file]'] = await MultipartFile.fromFile(
+        formFields['restaurant[supporting_docs_file]'] = await MultipartFile.fromFile(
           shopData.supportingDocsFilePath,
           filename: docsFileName,
         );

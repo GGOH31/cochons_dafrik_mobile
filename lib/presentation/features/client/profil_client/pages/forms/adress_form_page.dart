@@ -20,8 +20,6 @@ class _AdressFormPageState extends State<AdressFormPage> {
   late TextEditingController _labelController;
   late TextEditingController _communeController;
   late TextEditingController _detailsController;
-  late TextEditingController _latController;
-  late TextEditingController _lonController;
 
   bool _isDefault = false;
   bool _isLoading = false;
@@ -29,12 +27,18 @@ class _AdressFormPageState extends State<AdressFormPage> {
   @override
   void initState() {
     super.initState();
-    _labelController = TextEditingController(text: widget.address?['label'] ?? '');
-    _communeController = TextEditingController(text: widget.address?['commune'] ?? '');
-    _detailsController = TextEditingController(text: widget.address?['details'] ?? '');
-    _latController = TextEditingController(text: widget.address?['latitude']?.toString() ?? '');
-    _lonController = TextEditingController(text: widget.address?['longitude']?.toString() ?? '');
-    _isDefault = widget.address?['is_default'] == true || widget.address?['is_default'] == 1;
+    _labelController = TextEditingController(
+      text: widget.address?['label'] ?? '',
+    );
+    _communeController = TextEditingController(
+      text: widget.address?['commune'] ?? '',
+    );
+    _detailsController = TextEditingController(
+      text: widget.address?['details'] ?? '',
+    );
+    _isDefault =
+        widget.address?['is_default'] == true ||
+        widget.address?['is_default'] == 1;
   }
 
   @override
@@ -42,8 +46,6 @@ class _AdressFormPageState extends State<AdressFormPage> {
     _labelController.dispose();
     _communeController.dispose();
     _detailsController.dispose();
-    _latController.dispose();
-    _lonController.dispose();
     super.dispose();
   }
 
@@ -63,16 +65,6 @@ class _AdressFormPageState extends State<AdressFormPage> {
       'is_default': _isDefault ? 1 : 0,
     };
 
-    final latText = _latController.text.trim();
-    if (latText.isNotEmpty) {
-      data['latitude'] = double.tryParse(latText);
-    }
-
-    final lonText = _lonController.text.trim();
-    if (lonText.isNotEmpty) {
-      data['longitude'] = double.tryParse(lonText);
-    }
-
     try {
       if (widget.address != null) {
         // Edit mode
@@ -91,9 +83,9 @@ class _AdressFormPageState extends State<AdressFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.address != null 
-                ? "Adresse modifiée avec succès !" 
-                : "Adresse ajoutée avec succès !"
+              widget.address != null
+                  ? "Adresse modifiée avec succès !"
+                  : "Adresse ajoutée avec succès !",
             ),
             backgroundColor: CdaColors.vertForet,
           ),
@@ -148,7 +140,9 @@ class _AdressFormPageState extends State<AdressFormPage> {
               _buildLabel("Label de l'adresse"),
               TextFormField(
                 controller: _labelController,
-                decoration: _buildInputDecoration("Ex: Domicile, Bureau, Maison de maman"),
+                decoration: _buildInputDecoration(
+                  "Ex: Domicile, Bureau, Maison de maman",
+                ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return "Veuillez donner un nom à cette adresse.";
@@ -162,7 +156,9 @@ class _AdressFormPageState extends State<AdressFormPage> {
               _buildLabel("Commune"),
               TextFormField(
                 controller: _communeController,
-                decoration: _buildInputDecoration("Ex: Cocody, Yopougon, Marcory"),
+                decoration: _buildInputDecoration(
+                  "Ex: Cocody, Yopougon, Marcory",
+                ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return "Veuillez préciser la commune.";
@@ -177,7 +173,9 @@ class _AdressFormPageState extends State<AdressFormPage> {
               TextFormField(
                 controller: _detailsController,
                 maxLines: 3,
-                decoration: _buildInputDecoration("Ex: Cité des Arts, bâtiment D, porte 12. Face à la boutique de fruits."),
+                decoration: _buildInputDecoration(
+                  "Ex: Cité des Arts, bâtiment D, porte 12. Face à la restaurant de fruits.",
+                ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return "Les indications et détails d'adresse sont obligatoires.";
@@ -187,43 +185,12 @@ class _AdressFormPageState extends State<AdressFormPage> {
               ),
               const SizedBox(height: 16),
 
-              // GPS Row
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel("Latitude (Optionnel)"),
-                        TextFormField(
-                          controller: _latController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: _buildInputDecoration("Ex: 5.3484"),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel("Longitude (Optionnel)"),
-                        TextFormField(
-                          controller: _lonController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: _buildInputDecoration("Ex: -4.0305"),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
               // Default Toggle
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
@@ -281,10 +248,14 @@ class _AdressFormPageState extends State<AdressFormPage> {
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         )
                       : Text(
-                          isEditing ? "Enregistrer les modifications" : "Ajouter l'adresse",
+                          isEditing
+                              ? "Enregistrer les modifications"
+                              : "Ajouter l'adresse",
                           style: GoogleFonts.nunito(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

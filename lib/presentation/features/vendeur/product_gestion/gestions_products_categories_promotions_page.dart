@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
-import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/categories/pages/categories_page.dart';
-import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/products/pages/products_page.dart';
+
+import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/dishes/pages/products_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/promotions/pages/promotions_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/product_gestion/accompaniments/pages/accompaniment_page.dart';
 
@@ -12,7 +12,7 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         backgroundColor: CdaColors.creme,
         body: Column(
@@ -34,7 +34,7 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Mes produits & promos",
+                      "Mes dishes & promos",
                       style: GoogleFonts.fredoka(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -54,8 +54,7 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
                       unselectedLabelStyle: GoogleFonts.nunito(fontSize: 14),
                       isScrollable: true,
                       tabs: const [
-                        Tab(text: "Catégories"),
-                        Tab(text: "Produits"),
+                        Tab(text: "Plats"),
                         Tab(text: "Promotions"),
                         Tab(text: "Accompagnements"),
                       ],
@@ -69,7 +68,6 @@ class GestionsProductsCategoriesPromotionsPage extends StatelessWidget {
             const Expanded(
               child: TabBarView(
                 children: [
-                  CategoriesPage(),
                   ProductsPage(),
                   PromotionsPage(),
                   AccompanimentPage(),

@@ -29,7 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Contrôleurs Boutique (uniquement pour le rôle vendeur)
+  // Contrôleurs Restaurant (uniquement pour le rôle vendeur)
   final _shopNameController = TextEditingController();
   final _shopDescriptionController = TextEditingController();
   final _shopCommuneController = TextEditingController();
@@ -85,7 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ? null
               : _emailController.text.trim(),
           password: _passwordController.text,
-          shop: shopRequest,
+          restaurant: shopRequest,
         );
 
         Map<String, dynamic> response;
@@ -387,7 +387,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const Divider(color: CdaColors.ligne, thickness: 1.5),
                     const SizedBox(height: 16),
                     Text(
-                      "Informations de la boutique",
+                      "Informations de la restaurant",
                       style: GoogleFonts.fredoka(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -396,10 +396,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Champ Nom de la boutique (requis)
+                    // Champ Nom de la restaurant (requis)
                     CdaTextFormField(
                       controller: _shopNameController,
-                      labelText: "Nom de la boutique",
+                      labelText: "Nom de la restaurant",
                       hintText: "Ex: Boucherie Fine d'Abidjan",
                       prefixIcon: const Icon(
                         Icons.storefront_outlined,
@@ -408,7 +408,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       validator: (value) {
                         if (_selectedRole == "vendeur" &&
                             (value == null || value.trim().isEmpty)) {
-                          return "Le nom de la boutique est obligatoire";
+                          return "Le nom de la restaurant est obligatoire";
                         }
                         return null;
                       },
@@ -416,11 +416,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 20),
 
-                    // Champ Description de la boutique (facultatif)
+                    // Champ Description de la restaurant (facultatif)
                     CdaTextFormField(
                       controller: _shopDescriptionController,
                       labelText: "Description",
-                      hintText: "Décrivez vos produits ou spécialités...",
+                      hintText: "Décrivez vos dishes ou spécialités...",
                       prefixIcon: const Icon(
                         Icons.description_outlined,
                         color: CdaColors.gris,
@@ -465,9 +465,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 24),
 
-                    // Logo de la boutique (facultatif)
+                    // Logo de la restaurant (facultatif)
                     CdaFilePicker(
-                      title: "Logo de la boutique (Optionnel)",
+                      title: "Logo de la restaurant (Optionnel)",
                       subtitle: "Format image (PNG, JPG, JPEG) uniquement.",
                       fileType: FileType.image,
                       onFileSelected: (file) {

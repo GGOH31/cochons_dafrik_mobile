@@ -176,8 +176,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     }
     final List<String> parts = [];
     for (var item in items) {
-      final name =
-          item['product_name'] ?? item['product']?['name'] ?? 'Article';
+      final name = item['product_name'] ?? item['dish']?['name'] ?? 'Article';
       final qty = item['quantity'] ?? 1;
       parts.add("${qty}× $name");
     }
@@ -229,7 +228,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
             ),
             BottomNavigationBarItem(
               icon: Icon(LucideIcons.package),
-              label: 'Produits',
+              label: 'Plats',
             ),
             BottomNavigationBarItem(
               icon: Icon(LucideIcons.user),
@@ -259,22 +258,22 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
   }
 
   Widget _buildHomeTab() {
-    final shop = _dashboardData?['shop'] as Map<String, dynamic>?;
+    final restaurant = _dashboardData?['restaurant'] as Map<String, dynamic>?;
     final wallet = _dashboardData?['wallet'] as Map<String, dynamic>?;
     final stats = _dashboardData?['stats'] as Map<String, dynamic>?;
     final latestOrder =
         _dashboardData?['latest_order'] as Map<String, dynamic>?;
 
-    final shopName = shop?['name'] ?? 'Boutique Vendeur';
-    final commune = shop?['commune'] ?? 'Abidjan';
-    final isOpen = shop?['is_open'] ?? true;
+    final restaurantName = restaurant?['name'] ?? 'Restaurant Vendeur';
+    final commune = restaurant?['commune'] ?? 'Abidjan';
+    final isOpen = restaurant?['is_open'] ?? true;
 
     final balanceFcfa = wallet?['balance_fcfa'] ?? 0;
     final escrowFcfa = wallet?['escrow_fcfa'] ?? 0;
     final todayOrdersCount = stats?['today_orders_count'] ?? 0;
     final totalOrdersCount = stats?['total_orders_count'] ?? 0;
     final ratingAvg = stats?['rating_avg'] ?? 5.0;
-    final commissionPct = stats?['commission_pct'] ?? 10.0;
+    final commissionPct = stats?['commission_pct'] ?? 3.0;
 
     return Stack(
       children: [
@@ -298,7 +297,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "$shopName • $commune",
+                      "$restaurantName • $commune",
                       style: GoogleFonts.nunito(
                         fontSize: 14,
                         color: Colors.white.withOpacity(0.8),
@@ -619,7 +618,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
           ],
         ),
 
-        // Floating Badge Overlay ("Boutique ouverte")
+        // Floating Badge Overlay ("Restaurant ouverte")
         IgnorePointer(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,7 +641,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "$shopName • $commune",
+                            "$restaurantName • $commune",
                             style: GoogleFonts.nunito(fontSize: 14),
                           ),
                           const SizedBox(height: 4),
@@ -694,7 +693,9 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              isOpen ? "Boutique ouverte" : "Boutique fermée",
+                              isOpen
+                                  ? "Restaurant ouverte"
+                                  : "Restaurant fermée",
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.w800,
                                 color: isOpen

@@ -218,11 +218,11 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
     final status = order['status'] ?? '';
     final statusCfg = _getStatusConfig(status);
 
-    final shop = order['shop'] as Map<String, dynamic>?;
-    final shopName = shop?['name'] ?? 'Boutique';
+    final restaurant = order['restaurant'] as Map<String, dynamic>?;
+    final restaurantName = restaurant?['name'] ?? 'Restaurant';
 
     final address = order['address'] as Map<String, dynamic>?;
-    final commune = address?['commune'] ?? shop?['commune'] ?? 'Abidjan';
+    final commune = address?['commune'] ?? restaurant?['commune'] ?? 'Abidjan';
     final detailsAddress = address?['details'] ?? 'Livraison à domicile';
 
     final items = (order['items'] as List<dynamic>?) ?? [];
@@ -287,7 +287,7 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Boutique : $shopName",
+                  "Restaurant : $restaurantName",
                   style: GoogleFonts.nunito(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
                 _buildTimelineLine(statusCfg['step'] >= 2),
                 _buildTimelineStep(
                   2,
-                  "Acceptée par la boutique",
+                  "Acceptée par la restaurant",
                   statusCfg['step'] >= 2,
                 ),
                 _buildTimelineLine(statusCfg['step'] >= 3),
@@ -374,7 +374,7 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          "${items[i]['quantity'] ?? 1}× ${items[i]['product_name'] ?? items[i]['product']?['name'] ?? 'Produit'}",
+                          "${items[i]['quantity'] ?? 1}× ${items[i]['dish_name'] ?? items[i]['dish']?['name'] ?? 'Dish'}",
                           style: GoogleFonts.nunito(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -383,7 +383,7 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
                         ),
                       ),
                       Text(
-                        "${items[i]['total_price_fcfa'] ?? 0} F",
+                        "${items[i]['line_total_fcfa'] ?? 0} F",
                         style: GoogleFonts.nunito(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -425,7 +425,7 @@ class _CommandeClientDetailPageState extends State<CommandeClientDetailPage> {
           const SizedBox(height: 24),
 
           // Actions client (ex: confirmer réception si livrée)
-          if (status == 'delivered') ...[
+          if (status == 'delivered' || status == 'delivering') ...[
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

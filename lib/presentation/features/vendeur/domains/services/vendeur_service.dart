@@ -3,120 +3,55 @@ import 'package:cochons_dafrik_mobile/domains/services/base_service.dart';
 import 'package:dio/dio.dart';
 
 class VendeurService extends BaseService {
-  /// Récupérer toutes les catégories
-  Future<List<dynamic>> getCategories() async {
-    try {
-      final res = await getAll(VendeurEndPoints.categories);
-      if (res['success'] == true) {
-        return res['data'] as List<dynamic>;
-      } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des catégories');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  /// Créer une catégorie
-  Future<Map<String, dynamic>> createCategory(String name, String emoji) async {
-    try {
-      final res = await create(VendeurEndPoints.categories, {
-        'name': name,
-        'emojis': emoji,
-        'is_b2b': false,
-      });
-      if (res['success'] == true) {
-        return res['data'] as Map<String, dynamic>;
-      } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la création de la catégorie');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Mettre à jour une catégorie
-  Future<Map<String, dynamic>> updateCategory(int id, String name, String emoji) async {
-    try {
-      final res = await updateWithFormData(
-        VendeurEndPoints.categories,
-        {
-          'name': name,
-          'emojis': emoji,
-          'is_b2b': false,
-        },
-        id: id.toString(),
-      );
-      if (res['success'] == true) {
-        return res['data'] as Map<String, dynamic>;
-      } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour de la catégorie');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Supprimer une catégorie
-  Future<void> deleteCategory(int id) async {
-    try {
-      final res = await delete(VendeurEndPoints.categories, id: id.toString());
-      if (res['success'] != true) {
-        throw Exception(res['message'] ?? 'Erreur lors de la suppression de la catégorie');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Récupérer les produits du vendeur connecté
+  /// Récupérer les dishes du vendeur connecté
   Future<List<dynamic>> getProducts() async {
     try {
-      final res = await getAll('${ApiBase.baseUrlV1}vendeur/products');
+      final res = await getAll('${ApiBase.baseUrlV1}vendeur/dishes');
       if (res['success'] == true) {
         return res['data'] as List<dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des produits');
+        throw Exception(res['message'] ?? 'Erreur lors du chargement des dishes');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Créer un produit
+  /// Créer un dish
   Future<Map<String, dynamic>> createProduct(dynamic data) async {
     try {
-      final res = await createWithFormData(VendeurEndPoints.products, data);
+      final res = await createWithFormData(VendeurEndPoints.dishes, data);
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la création du produit');
+        throw Exception(res['message'] ?? 'Erreur lors de la création du dish');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Mettre à jour un produit
+  /// Mettre à jour un dish
   Future<Map<String, dynamic>> updateProduct(String id, dynamic data) async {
     try {
-      final res = await createWithFormData(VendeurEndPoints.products, data, id: id);
+      final res = await createWithFormData(VendeurEndPoints.dishes, data, id: id);
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour du produit');
+        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour du dish');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Supprimer un produit
+  /// Supprimer un dish
   Future<void> deleteProduct(String id) async {
     try {
-      final res = await delete(VendeurEndPoints.products, id: id);
+      final res = await delete(VendeurEndPoints.dishes, id: id);
       if (res['success'] != true) {
-        throw Exception(res['message'] ?? 'Erreur lors de la suppression du produit');
+        throw Exception(res['message'] ?? 'Erreur lors de la suppression du dish');
       }
     } catch (e) {
       rethrow;
@@ -245,21 +180,21 @@ class VendeurService extends BaseService {
     }
   }
 
-  /// Récupérer les informations de la boutique du vendeur
+  /// Récupérer les informations de la restaurant du vendeur
   Future<Map<String, dynamic>> getShopInfo() async {
     try {
-      final res = await getOne(VendeurEndPoints.shopInfo);
+      final res = await getOne(VendeurEndPoints.restaurantInfo);
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement de la boutique');
+        throw Exception(res['message'] ?? 'Erreur lors du chargement de la restaurant');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Mettre à jour les informations de la boutique
+  /// Mettre à jour les informations de la restaurant
   Future<Map<String, dynamic>> updateShopInfo(Map<String, dynamic> data, {String? logoPath}) async {
     try {
       final Map<String, dynamic> formFields = Map<String, dynamic>.from(data);
@@ -273,18 +208,18 @@ class VendeurService extends BaseService {
 
       final formData = FormData.fromMap(formFields);
 
-      final res = await createWithFormData(VendeurEndPoints.updateShopInfo, formData);
+      final res = await createWithFormData(VendeurEndPoints.updateRestaurantInfo, formData);
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour de la boutique');
+        throw Exception(res['message'] ?? 'Erreur lors de la mise à jour de la restaurant');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Récupérer les commandes reçues par la boutique (optionnellement filtrées par statut)
+  /// Récupérer les commandes reçues par la restaurant (optionnellement filtrées par statut)
   Future<List<dynamic>> getOrders({String? status}) async {
     try {
       final queryParams = <String, dynamic>{};
