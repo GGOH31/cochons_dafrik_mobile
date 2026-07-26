@@ -6,6 +6,7 @@ import 'package:cochons_dafrik_mobile/presentation/common/quantity_selector_comm
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/paiements/pages/paiement_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 
 class PanierPage extends StatefulWidget {
   final VoidCallback? onDiscoverTap;
@@ -27,24 +28,18 @@ class _PanierPageState extends State<PanierPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          "Mon Panier",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: CdaAppBar(
+        title: "Mon Panier",
+        showBackButton: Navigator.canPop(context),
+        backgroundColor: CdaColors.vertForet,
+        foregroundColor: CdaColors.creme,
         actions: [
           ValueListenableBuilder<List<CartItem>>(
             valueListenable: CartService.instance.cartNotifier,
             builder: (context, items, _) {
               if (items.isEmpty) return const SizedBox.shrink();
               return IconButton(
-                icon: const Icon(LucideIcons.trash2, color: CdaColors.rouge),
+                icon: Icon(LucideIcons.trash2, color: Colors.red.shade900),
                 onPressed: () {
                   showDialog(
                     context: context,

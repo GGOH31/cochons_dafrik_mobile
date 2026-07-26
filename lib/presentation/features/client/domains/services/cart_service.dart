@@ -145,7 +145,7 @@ class CartService {
       }
     }
 
-    final id = "${dishId}_$selectedSide";
+    final id = dishId;
     final existingIndex = cartNotifier.value.indexWhere(
       (item) => item.id == id,
     );

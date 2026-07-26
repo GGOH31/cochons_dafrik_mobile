@@ -1,4 +1,4 @@
-package com.example.cochons_dafrik_mobile
+package com.cochons.dafrik
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -5,6 +5,8 @@ import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/quantity_selector_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 
 class DishDetailPage extends StatefulWidget {
   const DishDetailPage({super.key});
@@ -32,7 +34,7 @@ class _DishDetailPageState extends State<DishDetailPage> {
     if (_selectedSideMap != null) {
       accPrice = (_selectedSideMap!['prix_unit'] as num?)?.toDouble() ?? 0.0;
     }
-    return (productPrice + accPrice) * _quantity;
+    return productPrice + (accPrice * _quantity);
   }
 
   Widget _buildSideChip(Map<String, dynamic> acc) {
@@ -90,21 +92,10 @@ class _DishDetailPageState extends State<DishDetailPage> {
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          "Détails du Dish",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: CdaColors.encre),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: const CdaAppBar(
+        title: "Détails du Dish",
+        backgroundColor: CdaColors.vertForet,
+        foregroundColor: CdaColors.creme,
       ),
       body: Column(
         children: [
@@ -131,9 +122,7 @@ class _DishDetailPageState extends State<DishDetailPage> {
                           ),
                         ],
                       ),
-                      child:
-                          dish.photoUrl != null &&
-                              dish.photoUrl!.isNotEmpty
+                      child: dish.photoUrl != null && dish.photoUrl!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(24),
                               child: Image.network(
@@ -311,7 +300,8 @@ class _DishDetailPageState extends State<DishDetailPage> {
                             ],
                           ),
                         ),
-                      if (dish.deliveryZone != null && dish.deliveryZone!.isNotEmpty)
+                      if (dish.deliveryZone != null &&
+                          dish.deliveryZone!.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -400,22 +390,23 @@ class _DishDetailPageState extends State<DishDetailPage> {
                   ],
 
                   // Quantity Selector
-                  QuantitySelectorCommon(
-                    quantity: _quantity,
-                    label: "portions",
-                    onIncrement: () {
-                      setState(() {
-                        _quantity++;
-                      });
-                    },
-                    onDecrement: () {
-                      if (_quantity > 1) {
+                  if (dish.accompaniments.isNotEmpty)
+                    QuantitySelectorCommon(
+                      quantity: _quantity,
+                      label: "portions",
+                      onIncrement: () {
                         setState(() {
-                          _quantity--;
+                          _quantity++;
                         });
-                      }
-                    },
-                  ),
+                      },
+                      onDecrement: () {
+                        if (_quantity > 1) {
+                          setState(() {
+                            _quantity--;
+                          });
+                        }
+                      },
+                    ),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -443,8 +434,13 @@ class _DishDetailPageState extends State<DishDetailPage> {
                     foregroundColor: Colors.white,
                     height: 56,
                     onPressed: () {
-                      final accName =
+                      final accNameBase =
                           _selectedSideMap?['name'] ?? 'Sans accompagnement';
+                      final accName =
+                          dish.accompaniments.isNotEmpty &&
+                              _selectedSideMap != null
+                          ? "$_quantity x $accNameBase"
+                          : accNameBase;
                       final accPrice =
                           (_selectedSideMap?['prix_unit'] as num?)
                               ?.toDouble() ??
@@ -459,20 +455,25 @@ class _DishDetailPageState extends State<DishDetailPage> {
                           productPhotoUrl: dish.photoUrl,
                           productEmoji: dish.emoji,
                           restaurantName: dish.restaurantName,
-                          quantity: _quantity,
+                          quantity: 1,
                           selectedSide: accName,
-                          selectedSidePrice: accPrice,
+                          selectedSidePrice: accPrice * _quantity,
                         );
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "${dish.name} (x$_quantity) avec $accName ajouté au panier !",
+                              "${dish.name} avec $accName ajouté au panier !",
                             ),
                             backgroundColor: CdaColors.vertForet,
                           ),
                         );
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PanierPage(),
+                          ),
+                        );
                       } catch (e) {
                         showDialog(
                           context: context,
@@ -503,7 +504,9 @@ class _DishDetailPageState extends State<DishDetailPage> {
                                   Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Panier vidé. Vous pouvez maintenant ajouter ce plat."),
+                                      content: Text(
+                                        "Panier vidé. Vous pouvez maintenant ajouter ce plat.",
+                                      ),
                                       backgroundColor: CdaColors.vertForet,
                                     ),
                                   );

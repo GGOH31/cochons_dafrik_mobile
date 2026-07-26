@@ -474,76 +474,67 @@ class _PaiementPageState extends State<PaiementPage> {
       backgroundColor: CdaColors.creme,
       body: Column(
         children: [
-          // Header using AppHeaderBanner and Stack for yellow banner overlay
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              AppHeaderBanner(
-                padding: const EdgeInsets.fromLTRB(20, 50, 20, 36),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Paiement sécurisé",
-                      style: GoogleFonts.fredoka(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+          // Header using AppHeaderBanner
+          AppHeaderBanner(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
                 ),
+                const SizedBox(width: 8),
+                Text(
+                  "Paiement sécurisé",
+                  style: GoogleFonts.fredoka(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Secured payment notification banner overlaid at the bottom of the header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFC107),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              // Secured payment notification banner overlaid at the bottom of the header
-              Positioned(
-                bottom: -20,
-                left: 20,
-                right: 20,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    LucideIcons.lock,
+                    size: 16,
+                    color: CdaColors.encre,
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFC107),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        LucideIcons.lock,
-                        size: 16,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Payé avant cuisson . protégé Cochons d'Afrik",
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                         color: CdaColors.encre,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          "Payé avant cuisson . protégé Cochons d'Afrik",
-                          style: GoogleFonts.nunito(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: CdaColors.encre,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
 
           // Main body content (Scrollable)

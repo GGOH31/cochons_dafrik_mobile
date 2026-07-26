@@ -7,6 +7,9 @@ import 'package:cochons_dafrik_mobile/presentation/common/appHeaderBanner_common
 import 'package:cochons_dafrik_mobile/presentation/common/card_dish_common.dart';
 import 'package:cochons_dafrik_mobile/core/constants/app_routes.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 
 class DishClientPage extends StatefulWidget {
   const DishClientPage({super.key});
@@ -66,20 +69,51 @@ class _DishClientPageState extends State<DishClientPage> {
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          restaurant.name,
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+      appBar: CdaAppBar(
+        title: restaurant.name,
         backgroundColor: CdaColors.vertForet,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        foregroundColor: Colors.white,
+        showBackButton: true,
+        actions: [
+          ValueListenableBuilder<List<CartItem>>(
+            valueListenable: CartService.instance.cartNotifier,
+            builder: (context, cartItems, _) {
+              final totalQuantity = cartItems.fold<int>(
+                0,
+                (sum, item) => sum + item.quantity,
+              );
+
+              Widget iconWidget = const Icon(
+                Icons.shopping_cart,
+                color: Colors.white,
+              );
+              if (totalQuantity > 0) {
+                iconWidget = Badge(
+                  label: Text(
+                    totalQuantity.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: CdaColors.rouge,
+                  child: iconWidget,
+                );
+              }
+
+              return IconButton(
+                icon: iconWidget,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PanierPage()),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

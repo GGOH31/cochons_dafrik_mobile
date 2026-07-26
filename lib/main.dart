@@ -18,7 +18,6 @@ import 'presentation/features/onBoarding/pages/onboarding_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
@@ -30,11 +29,7 @@ void main() async {
     DioClient.instance.setAuthToken(token);
   }
 
-  runApp(MyApp(
-    showOnboarding: showOnboarding,
-    token: token,
-    role: role,
-  ));
+  runApp(MyApp(showOnboarding: showOnboarding, token: token, role: role));
 }
 
 class MyApp extends StatelessWidget {
@@ -42,12 +37,7 @@ class MyApp extends StatelessWidget {
   final String? token;
   final String? role;
 
-  const MyApp({
-    super.key,
-    required this.showOnboarding,
-    this.token,
-    this.role,
-  });
+  const MyApp({super.key, required this.showOnboarding, this.token, this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +48,12 @@ class MyApp extends StatelessWidget {
       theme: cdaTheme(),
       initialRoute: showOnboarding
           ? AppRoutes.onBoarding
-          : (token != null && token!.isNotEmpty && role != null && role!.isNotEmpty)
-              ? (role == 'vendeur' ? AppRoutes.homeVendeur : AppRoutes.homeClient)
-              : AppRoutes.login,
+          : (token != null &&
+                token!.isNotEmpty &&
+                role != null &&
+                role!.isNotEmpty)
+          ? (role == 'vendeur' ? AppRoutes.homeVendeur : AppRoutes.homeClient)
+          : AppRoutes.login,
       routes: {
         AppRoutes.onBoarding: (context) => const OnboardingPage(),
         AppRoutes.login: (context) => const LoginPage(),

@@ -75,7 +75,11 @@ class _HomeClientPageState extends State<HomeClientPage> {
           final restaurant = p['restaurant'] ?? {};
           final restaurantName = restaurant['name'] ?? 'Restaurant';
           final restaurantLocation = restaurant['commune'] ?? 'Cocody';
-          return Dish.fromJson(p, restaurantName, restaurantLocation: restaurantLocation);
+          return Dish.fromJson(
+            p,
+            restaurantName,
+            restaurantLocation: restaurantLocation,
+          );
         }).toList();
         _isSearchLoading = false;
       });
@@ -569,8 +573,11 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                             content: Text(
                                               "${dish.name} ajouté au panier !",
                                             ),
-                                            duration: const Duration(seconds: 1),
-                                            backgroundColor: CdaColors.vertForet,
+                                            duration: const Duration(
+                                              seconds: 1,
+                                            ),
+                                            backgroundColor:
+                                                CdaColors.vertForet,
                                           ),
                                         );
                                       } catch (e) {
@@ -584,12 +591,16 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                               ),
                                             ),
                                             content: Text(
-                                              e.toString().replaceAll("Exception: ", ""),
+                                              e.toString().replaceAll(
+                                                "Exception: ",
+                                                "",
+                                              ),
                                               style: GoogleFonts.nunito(),
                                             ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
                                                 child: Text(
                                                   "Annuler",
                                                   style: GoogleFonts.nunito(
@@ -599,12 +610,18 @@ class _HomeClientPageState extends State<HomeClientPage> {
                                               ),
                                               TextButton(
                                                 onPressed: () {
-                                                  CartService.instance.clearCart();
+                                                  CartService.instance
+                                                      .clearCart();
                                                   Navigator.pop(context);
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
                                                     const SnackBar(
-                                                      content: Text("Panier vidé. Vous pouvez maintenant ajouter ce plat."),
-                                                      backgroundColor: CdaColors.vertForet,
+                                                      content: Text(
+                                                        "Panier vidé. Vous pouvez maintenant ajouter ce plat.",
+                                                      ),
+                                                      backgroundColor:
+                                                          CdaColors.vertForet,
                                                     ),
                                                   );
                                                 },

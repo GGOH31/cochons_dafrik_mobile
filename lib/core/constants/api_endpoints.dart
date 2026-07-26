@@ -1,6 +1,6 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://10.118.138.131:8000';
-  //static const String baseUrl = "http://150.107.201.90:8043";
+  //static const String baseUrl = 'http://10.118.138.131:8000';
+  static const String baseUrl = "http://150.107.201.90:8043";
 }
 
 class ApiBase {
