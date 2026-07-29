@@ -46,6 +46,7 @@ dependencies:
   lucide_icons: ^0.257.0
   geolocator: ^14.0.2
   geocoding: ^5.0.0
+  rename: ^3.1.0
 
 dev_dependencies:
   flutter_test:

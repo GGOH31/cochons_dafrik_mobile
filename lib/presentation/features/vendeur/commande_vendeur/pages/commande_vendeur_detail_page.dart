@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 
 class CommandeVendeurDetailPage extends StatefulWidget {
   final String orderId;
@@ -14,7 +16,8 @@ class CommandeVendeurDetailPage extends StatefulWidget {
   });
 
   @override
-  State<CommandeVendeurDetailPage> createState() => _CommandeVendeurDetailPageState();
+  State<CommandeVendeurDetailPage> createState() =>
+      _CommandeVendeurDetailPageState();
 }
 
 class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
@@ -195,21 +198,13 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          _order != null ? "#${_order!['reference'] ?? 'Détails'}" : "Détail Commande",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: CdaColors.encre),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: CdaAppBar(
+        title: _order != null
+            ? "#${_order!['reference'] ?? 'Détails'}"
+            : "Détail Commande",
+        showBackButton: true,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
       ),
       body: _buildBody(),
     );
@@ -234,10 +229,11 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
               style: GoogleFonts.nunito(color: CdaColors.gris, fontSize: 14),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            CdaElevatedButton(
               onPressed: _fetchOrderDetails,
-              style: ElevatedButton.styleFrom(backgroundColor: CdaColors.vertForet),
-              child: const Text("Réessayer", style: TextStyle(color: Colors.white)),
+              backgroundColor: CdaColors.vertForet,
+              foregroundColor: Colors.white,
+              text: "Réessayer",
             ),
           ],
         ),
@@ -254,7 +250,10 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
     final buyerPhone = buyer?['phone'] ?? 'N/A';
 
     final address = order['address'] as Map<String, dynamic>?;
-    final commune = address?['commune'] ?? order['restaurant']?['commune'] ?? 'Non spécifiée';
+    final commune =
+        address?['commune'] ??
+        order['restaurant']?['commune'] ??
+        'Non spécifiée';
     final detailsAddress = address?['details'] ?? 'Livraison standard';
 
     final items = (order['items'] as List<dynamic>?) ?? [];
@@ -296,7 +295,10 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: statusCfg['bg'],
                         borderRadius: BorderRadius.circular(20),
@@ -315,7 +317,10 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                 const SizedBox(height: 8),
                 Text(
                   "Type : ${order['order_type'] == 'b2b' ? 'B2B (Vente en gros)' : 'B2C (Vente au détail)'}",
-                  style: GoogleFonts.nunito(fontSize: 13, color: CdaColors.gris),
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: CdaColors.gris,
+                  ),
                 ),
               ],
             ),
@@ -402,9 +407,18 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
                 const SizedBox(height: 8),
                 _buildDetailRow("Frais de livraison", "$delivery FCFA"),
                 const Divider(height: 16, color: CdaColors.ligne),
-                _buildDetailRow("Montant Total", "$total FCFA", isBold: true, color: CdaColors.vertForet),
+                _buildDetailRow(
+                  "Montant Total",
+                  "$total FCFA",
+                  isBold: true,
+                  color: CdaColors.vertForet,
+                ),
                 const SizedBox(height: 8),
-                _buildDetailRow("Net Vendeur", "$sellerNet FCFA", color: CdaColors.encre),
+                _buildDetailRow(
+                  "Net Vendeur",
+                  "$sellerNet FCFA",
+                  color: CdaColors.encre,
+                ),
               ],
             ),
           ),
@@ -415,31 +429,31 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: CdaElevatedButton(
                     onPressed: _acceptOrder,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E6C40),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
+                    backgroundColor: const Color(0xFF1E6C40),
                     child: Text(
                       "Accepter & Cuire",
-                      style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
+                  child: CdaElevatedButton(
                     onPressed: _refuseOrder,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFCEBEB),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
+                    backgroundColor: const Color(0xFFFCEBEB),
                     child: Text(
                       "Refuser",
-                      style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: CdaColors.rouge, fontSize: 15),
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.bold,
+                        color: CdaColors.rouge,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -448,32 +462,32 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
           ] else if (status == 'accepted') ...[
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: CdaElevatedButton(
                 onPressed: () => _updateStatus('preparing'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CdaColors.vertForet,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                backgroundColor: const Color(0xFFD68000),
                 child: Text(
                   "Passer en préparation / Cuisson",
-                  style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ),
           ] else if (status == 'preparing') ...[
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: CdaElevatedButton(
                 onPressed: () => _updateStatus('delivering'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CdaColors.vertForet,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                backgroundColor: const Color(0xFF1976D2),
                 child: Text(
                   "Lancer la livraison (En route)",
-                  style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ),
@@ -522,16 +536,18 @@ class _CommandeVendeurDetailPageState extends State<CommandeVendeurDetailPage> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isBold = false, Color? color}) {
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    Color? color,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: GoogleFonts.nunito(
-            fontSize: 14,
-            color: CdaColors.gris,
-          ),
+          style: GoogleFonts.nunito(fontSize: 14, color: CdaColors.gris),
         ),
         Flexible(
           child: Text(

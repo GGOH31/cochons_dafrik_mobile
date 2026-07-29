@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class PromotionFormPage extends StatefulWidget {
@@ -68,7 +69,9 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
         _isProductsLoading = false;
 
         if (_selectedProductId != null) {
-          final exists = prods.any((p) => p['id'].toString() == _selectedProductId);
+          final exists = prods.any(
+            (p) => p['id'].toString() == _selectedProductId,
+          );
           if (!exists) {
             _selectedProductId = null;
           }
@@ -267,21 +270,11 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          isEditing ? "Modifier la Promotion" : "Créer une Promotion",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: CdaColors.encre),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: CdaAppBar(
+        title: isEditing ? "Modifier la Promotion" : "Créer une Promotion",
+        showBackButton: true,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
       ),
       body: _isProductsLoading
           ? const Center(
@@ -290,335 +283,334 @@ class _PromotionFormPageState extends State<PromotionFormPage> {
               ),
             )
           : _products.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "⚠️",
-                          style: TextStyle(fontSize: 48),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "Vous devez d'abord créer au moins un dish pour pouvoir créer des promotions.",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            fontSize: 16,
-                            color: CdaColors.encre,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CdaColors.vertForet,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              "Retour",
-                              style: GoogleFonts.nunito(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Stack(
+          ? Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFFCEBEB),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  LucideIcons.tag,
-                                  color: Color(0xFFE05234),
-                                  size: 40,
-                                ),
-                              ),
+                    const Text("⚠️", style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Vous devez d'abord créer au moins un dish pour pouvoir créer des promotions.",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        fontSize: 16,
+                        color: CdaColors.encre,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CdaColors.vertForet,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          "Retour",
+                          style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFCEBEB),
+                              shape: BoxShape.circle,
                             ),
-                            const SizedBox(height: 28),
+                            child: const Icon(
+                              LucideIcons.tag,
+                              color: Color(0xFFE05234),
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
 
-                            // Dish Dropdown
-                            Text(
-                              "Associer au dish *",
-                              style: GoogleFonts.fredoka(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CdaColors.encre,
-                              ),
+                        // Dish Dropdown
+                        Text(
+                          "Associer au dish *",
+                          style: GoogleFonts.fredoka(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: CdaColors.encre,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedProductId,
+                          decoration: InputDecoration(
+                            fillColor: Colors.white,
+                            filled: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<String>(
-                              value: _selectedProductId,
-                              decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                filled: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              style: GoogleFonts.nunito(
-                                color: CdaColors.encre,
-                                fontSize: 15,
-                              ),
-                              hint: const Text("Sélectionnez un dish"),
-                              items: _products.map((prod) {
-                                return DropdownMenuItem<String>(
-                                  value: prod['id'].toString(),
-                                  child: Text(prod['name'] ?? ''),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedProductId = value;
-                                });
-                              },
-                              validator: (value) =>
-                                  value == null ? "Ce champ est requis" : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            const SizedBox(height: 20),
+                          ),
+                          style: GoogleFonts.nunito(
+                            color: CdaColors.encre,
+                            fontSize: 15,
+                          ),
+                          hint: const Text("Sélectionnez un dish"),
+                          items: _products.map((prod) {
+                            return DropdownMenuItem<String>(
+                              value: prod['id'].toString(),
+                              child: Text(prod['name'] ?? ''),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedProductId = value;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? "Ce champ est requis" : null,
+                        ),
+                        const SizedBox(height: 20),
 
-                            // Name
-                            Text(
-                              "Nom de la promotion *",
-                              style: GoogleFonts.fredoka(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CdaColors.encre,
-                              ),
+                        // Name
+                        Text(
+                          "Nom de la promotion *",
+                          style: GoogleFonts.fredoka(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: CdaColors.encre,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            hintText: "Ex: Week-end braisé",
+                            fillColor: Colors.white,
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _titleController,
-                              decoration: InputDecoration(
-                                hintText: "Ex: Week-end braisé",
-                                fillColor: Colors.white,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              style: GoogleFonts.nunito(
-                                color: CdaColors.encre,
-                                fontSize: 15,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return "Ce champ est requis";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 20),
+                          ),
+                          style: GoogleFonts.nunito(
+                            color: CdaColors.encre,
+                            fontSize: 15,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Ce champ est requis";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
 
-                            // Percentage
-                            Text(
-                              "Pourcentage de réduction (%) *",
-                              style: GoogleFonts.fredoka(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CdaColors.encre,
-                              ),
+                        // Percentage
+                        Text(
+                          "Pourcentage de réduction (%) *",
+                          style: GoogleFonts.fredoka(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: CdaColors.encre,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _valueController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: "Ex: 20",
+                            fillColor: Colors.white,
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _valueController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "Ex: 20",
-                                fillColor: Colors.white,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              style: GoogleFonts.nunito(
-                                color: CdaColors.encre,
-                                fontSize: 15,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return "Ce champ est requis";
-                                }
-                                final intVal = int.tryParse(value);
-                                if (intVal == null || intVal <= 0 || intVal > 100) {
-                                  return "Veuillez entrer un pourcentage entre 1 et 100";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 20),
+                          ),
+                          style: GoogleFonts.nunito(
+                            color: CdaColors.encre,
+                            fontSize: 15,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Ce champ est requis";
+                            }
+                            final intVal = int.tryParse(value);
+                            if (intVal == null || intVal <= 0 || intVal > 100) {
+                              return "Veuillez entrer un pourcentage entre 1 et 100";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
 
-                            // Validity Period
-                            Text(
-                              "Période de validité *",
-                              style: GoogleFonts.fredoka(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CdaColors.encre,
-                              ),
+                        // Validity Period
+                        Text(
+                          "Période de validité *",
+                          style: GoogleFonts.fredoka(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: CdaColors.encre,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: _pickDateRange,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
                             ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: _pickDateRange,
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      _selectedDateRange == null
-                                          ? "Sélectionner les dates"
-                                          : "${_selectedDateRange!.start.day}/${_selectedDateRange!.start.month}/${_selectedDateRange!.start.year} au ${_selectedDateRange!.end.day}/${_selectedDateRange!.end.month}/${_selectedDateRange!.end.year}",
-                                      style: GoogleFonts.nunito(
-                                        fontSize: 15,
-                                        color: _selectedDateRange == null
-                                            ? CdaColors.gris
-                                            : CdaColors.encre,
-                                        fontWeight: _selectedDateRange == null
-                                            ? FontWeight.normal
-                                            : FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      LucideIcons.calendar,
-                                      color: CdaColors.gris,
-                                      size: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 20),
-
-                            // Status Toggle
-                            Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Statut active",
-                                  style: GoogleFonts.fredoka(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: CdaColors.encre,
+                                  _selectedDateRange == null
+                                      ? "Sélectionner les dates"
+                                      : "${_selectedDateRange!.start.day}/${_selectedDateRange!.start.month}/${_selectedDateRange!.start.year} au ${_selectedDateRange!.end.day}/${_selectedDateRange!.end.month}/${_selectedDateRange!.end.year}",
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 15,
+                                    color: _selectedDateRange == null
+                                        ? CdaColors.gris
+                                        : CdaColors.encre,
+                                    fontWeight: _selectedDateRange == null
+                                        ? FontWeight.normal
+                                        : FontWeight.bold,
                                   ),
                                 ),
-                                Switch(
-                                  value: _isActive,
-                                  activeColor: CdaColors.vertForet,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _isActive = value;
-                                    });
-                                  },
+                                const Icon(
+                                  LucideIcons.calendar,
+                                  color: CdaColors.gris,
+                                  size: 20,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 40),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
 
-                            // Save Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: _save,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFE05234),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
+                        // Status Toggle
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Statut active",
+                              style: GoogleFonts.fredoka(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: CdaColors.encre,
+                              ),
+                            ),
+                            Switch(
+                              value: _isActive,
+                              activeColor: CdaColors.vertForet,
+                              onChanged: (value) {
+                                setState(() {
+                                  _isActive = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+
+                        // Save Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _save,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE05234),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: Text(
+                              isEditing
+                                  ? "Enregistrer les modifications"
+                                  : "Créer la promotion",
+                              style: GoogleFonts.nunito(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Delete Button
+                        if (isEditing) ...[
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: OutlinedButton(
+                              onPressed: _delete,
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: CdaColors.rouge),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                child: Text(
-                                  isEditing
-                                      ? "Enregistrer les modifications"
-                                      : "Créer la promotion",
-                                  style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
+                              ),
+                              child: Text(
+                                "Supprimer la promotion",
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.bold,
+                                  color: CdaColors.rouge,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),
-
-                            // Delete Button
-                            if (isEditing) ...[
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 52,
-                                child: OutlinedButton(
-                                  onPressed: _delete,
-                                  style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(color: CdaColors.rouge),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Supprimer la promotion",
-                                    style: GoogleFonts.nunito(
-                                      fontWeight: FontWeight.bold,
-                                      color: CdaColors.rouge,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                if (_isLoading)
+                  Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          CdaColors.vertForet,
                         ),
                       ),
                     ),
-                    if (_isLoading)
-                      Container(
-                        color: Colors.black.withOpacity(0.3),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(CdaColors.vertForet),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                  ),
+              ],
+            ),
     );
   }
 }

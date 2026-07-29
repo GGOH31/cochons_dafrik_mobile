@@ -1,3 +1,5 @@
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -24,10 +26,10 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
 
   final List<Map<String, String?>> _filters = [
     {'label': 'Toutes', 'status': null},
-    {'label': 'En cours', 'status': 'paid'},
+    {'label': 'En cours', 'status': 'pending_payment,paid,accepted'},
     {'label': 'En préparation', 'status': 'preparing'},
     {'label': 'En livraison', 'status': 'delivering'},
-    {'label': 'Livrées', 'status': 'delivered'},
+    {'label': 'Livrées', 'status': 'delivered,completed'},
   ];
 
   @override
@@ -128,8 +130,7 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
     }
     final List<String> parts = [];
     for (var item in items) {
-      final name =
-          item['product_name'] ?? item['dish']?['name'] ?? 'Dish';
+      final name = item['product_name'] ?? item['dish']?['name'] ?? 'Dish';
       final qty = item['quantity'] ?? 1;
       parts.add("${qty}× $name");
     }
@@ -140,17 +141,11 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          "Mes Commandes",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: const CdaAppBar(
+        title: 'Mes Commandes',
+        showBackButton: false,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
       ),
       body: Column(
         children: [
@@ -294,18 +289,12 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
                 ),
                 const SizedBox(height: 24),
                 if (widget.onDiscoverTap != null)
-                  ElevatedButton(
+                  CdaElevatedButton(
                     onPressed: widget.onDiscoverTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CdaColors.vertForet,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    backgroundColor: CdaColors.vertForet,
+                    foregroundColor: Colors.white,
+                    height: 60,
+                    width: 300,
                     child: Text(
                       "Découvrir les restaurants",
                       style: GoogleFonts.nunito(
@@ -347,96 +336,99 @@ class _CommandeClientPageState extends State<CommandeClientPage> {
             );
           },
           child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: CdaColors.ligne, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      restaurantName,
-                      style: GoogleFonts.fredoka(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: CdaColors.encre,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusCfg['bg'],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      statusCfg['label'],
-                      style: GoogleFonts.nunito(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: statusCfg['color'],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                reference,
-                style: GoogleFonts.nunito(
-                  fontSize: 12,
-                  color: CdaColors.gris,
-                  fontWeight: FontWeight.w600,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: CdaColors.ligne, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-              const Divider(height: 20, color: CdaColors.ligne),
-              Text(
-                itemsDetails,
-                style: GoogleFonts.nunito(fontSize: 14, color: CdaColors.encre),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Total :",
-                    style: GoogleFonts.nunito(
-                      fontSize: 14,
-                      color: CdaColors.gris,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        restaurantName,
+                        style: GoogleFonts.fredoka(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: CdaColors.encre,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  Text(
-                    total,
-                    style: GoogleFonts.fredoka(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: CdaColors.vertForet,
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusCfg['bg'],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        statusCfg['label'],
+                        style: GoogleFonts.nunito(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: statusCfg['color'],
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  reference,
+                  style: GoogleFonts.nunito(
+                    fontSize: 12,
+                    color: CdaColors.gris,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const Divider(height: 20, color: CdaColors.ligne),
+                Text(
+                  itemsDetails,
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: CdaColors.encre,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total :",
+                      style: GoogleFonts.nunito(
+                        fontSize: 14,
+                        color: CdaColors.gris,
+                      ),
+                    ),
+                    Text(
+                      total,
+                      style: GoogleFonts.fredoka(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: CdaColors.vertForet,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
       },
     );
   }

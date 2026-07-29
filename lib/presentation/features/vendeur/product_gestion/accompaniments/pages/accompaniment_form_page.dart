@@ -5,6 +5,7 @@ import 'package:dio/dio.dart' as dio_pkg;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/file_picker_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class AccompanimentFormPage extends StatefulWidget {
@@ -230,21 +231,11 @@ class _AccompanimentFormPageState extends State<AccompanimentFormPage> {
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          isEdit ? "Modifier l'accompagnement" : "Ajouter un accompagnement",
-          style: GoogleFonts.fredoka(
-            color: CdaColors.encre,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: CdaColors.encre),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: CdaAppBar(
+        title: isEdit ? "Modifier l'accompagnement" : "Ajouter un accompagnement",
+          showBackButton: true,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
       ),
       body: _isProductsLoading
           ? const Center(

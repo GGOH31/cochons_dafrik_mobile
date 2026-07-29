@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/card_commande_vendeur_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/commande_vendeur/pages/commande_vendeur_detail_page.dart';
@@ -43,7 +44,9 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
     });
 
     try {
-      final orders = await _vendeurService.getOrders(status: _selectedStatusFilter);
+      final orders = await _vendeurService.getOrders(
+        status: _selectedStatusFilter,
+      );
       if (mounted) {
         setState(() {
           _orders = orders;
@@ -180,17 +183,11 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          "Mes Commandes Reçues",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: const CdaAppBar(
+        title: "Mes Commandes Reçues",
+        showBackButton: false,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
       ),
       body: Column(
         children: [
@@ -262,11 +259,18 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
           Center(
             child: Column(
               children: [
-                const Icon(Icons.error_outline, size: 48, color: CdaColors.rouge),
+                const Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: CdaColors.rouge,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  style: GoogleFonts.nunito(color: CdaColors.gris, fontSize: 14),
+                  style: GoogleFonts.nunito(
+                    color: CdaColors.gris,
+                    fontSize: 14,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -275,7 +279,10 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CdaColors.vertForet,
                   ),
-                  child: const Text("Réessayer", style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "Réessayer",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -309,7 +316,10 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
                 const SizedBox(height: 8),
                 Text(
                   "Les commandes reçues s'afficheront ici.",
-                  style: GoogleFonts.nunito(fontSize: 14, color: CdaColors.gris),
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: CdaColors.gris,
+                  ),
                 ),
               ],
             ),
@@ -329,7 +339,8 @@ class _CommandeVendeurPageState extends State<CommandeVendeurPage> {
         final customerName = buyer?['full_name'] ?? 'Client';
         final details = _formatItemsDetails(order['items']);
         final address = order['address'] as Map<String, dynamic>?;
-        final commune = address?['commune'] ?? order['restaurant']?['commune'] ?? 'Abidjan';
+        final commune =
+            address?['commune'] ?? order['restaurant']?['commune'] ?? 'Abidjan';
         final price = "${order['total_fcfa'] ?? 0} F";
 
         final String status = order['status'] ?? '';

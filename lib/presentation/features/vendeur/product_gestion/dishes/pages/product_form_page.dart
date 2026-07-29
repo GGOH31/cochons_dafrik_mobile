@@ -5,6 +5,7 @@ import 'package:dio/dio.dart' as dio_pkg;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/file_picker_common.dart';
+import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
 
 class ProductFormPage extends StatefulWidget {
@@ -29,8 +30,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
   PlatformFile? _pickedFile;
   String? _shopId;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -51,8 +50,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
         text: widget.initialProduct!["prep_minutes"]?.toString() ?? "15",
       );
       _isOnline = widget.initialProduct!["is_active"] ?? true;
-
-
     } else {
       _nameController = TextEditingController();
       _priceController = TextEditingController();
@@ -85,8 +82,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
     super.dispose();
   }
-
-
 
   void _save() async {
     if (_nameController.text.trim().isEmpty ||
@@ -121,8 +116,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
       'prep_minutes': int.tryParse(_prepMinutesController.text.trim()) ?? 15,
     };
 
-
-
     if (widget.initialProduct != null) {
       fields['_method'] = 'PUT';
     }
@@ -137,8 +130,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
         filename: fileName,
       );
     }
-
-
 
     final formData = dio_pkg.FormData.fromMap(fields);
 
@@ -243,18 +234,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
     return Scaffold(
       backgroundColor: CdaColors.creme,
-      appBar: AppBar(
-        title: Text(
-          isEditing ? "Modifier le Dish" : "Ajouter un Dish",
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.bold,
-            color: CdaColors.encre,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: CdaColors.encre),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: CdaAppBar(
+        title: isEditing ? "Modifier le Dish" : "Ajouter un Dish",
         actions: [
           if (isEditing)
             IconButton(
@@ -262,9 +243,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
               onPressed: _delete,
             ),
         ],
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        backgroundColor: CdaColors.vertFonce,
+        foregroundColor: CdaColors.creme,
+        showBackButton: true,
       ),
       body: _isLoading
           ? const Center(
@@ -355,30 +336,28 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
                   const SizedBox(height: 20),
 
-
-
-                            Text(
-                              "Préparation (min)",
-                              style: GoogleFonts.fredoka(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CdaColors.encre,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _prepMinutesController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "Ex: 15",
-                                fillColor: Colors.white,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                            ),
+                  Text(
+                    "Préparation (min)",
+                    style: GoogleFonts.fredoka(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: CdaColors.encre,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _prepMinutesController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: "Ex: 15",
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
                   Text(
@@ -428,10 +407,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-
-
-
 
                   // Online Toggle
                   Row(
