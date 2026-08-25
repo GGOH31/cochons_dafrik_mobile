@@ -39,7 +39,10 @@ class AuthService extends BaseService {
           }
           final restaurant = user['restaurant'];
           if (restaurant != null && restaurant['id'] != null) {
-            await _dioClient.storeValue('restaurant_id', restaurant['id'].toString());
+            await _dioClient.storeValue(
+              'restaurant_id',
+              restaurant['id'].toString(),
+            );
           }
           await CartService.instance.loadCart();
         }
@@ -64,69 +67,6 @@ class AuthService extends BaseService {
         AuthEndPoints.register,
         data: request.toJson(),
       );
-
-      final data = response.data;
-      if (data != null && data['success'] == true) {
-        return data;
-      } else {
-        throw Exception(
-          data != null ? data['message'] : "Erreur d'inscription",
-        );
-      }
-    } on DioException catch (e) {
-      final responseData = e.response?.data;
-      if (responseData != null && responseData['message'] != null) {
-        throw Exception(responseData['message']);
-      }
-      throw Exception('Erreur réseau : ${e.message}');
-    }
-  }
-
-  /// Inscrit un nouveau vendeur (avec les détails de sa restaurant et justificatifs d'activité).
-  /// Déclenche l'envoi d'un code OTP par SMS.
-  Future<Map<String, dynamic>> registerVendeur(StoreUserRequest request) async {
-    try {
-      final Map<String, dynamic> formFields = request.toJson();
-
-      // Si des détails de restaurant sont fournis, nous convertissons le JSON
-      // à plat au format multi-part attendu par Laravel (e.g. restaurant[name])
-      final shopData = request.restaurant;
-      if (shopData != null) {
-        // Retirer la clé de structure imbriquée 'restaurant' pour la reconstruire
-        formFields.remove('restaurant');
-
-        formFields['restaurant[name]'] = shopData.name;
-        formFields['restaurant[commune]'] = shopData.commune;
-
-        if (shopData.description != null &&
-            shopData.description!.trim().isNotEmpty) {
-          formFields['restaurant[description]'] = shopData.description;
-        }
-        if (shopData.address != null && shopData.address!.trim().isNotEmpty) {
-          formFields['restaurant[address]'] = shopData.address;
-        }
-
-        // Ajout du fichier de logo si présent
-        if (shopData.logoFilePath != null &&
-            shopData.logoFilePath!.isNotEmpty) {
-          final logoFileName = shopData.logoFilePath!.split('/').last;
-          formFields['restaurant[logo_file]'] = await MultipartFile.fromFile(
-            shopData.logoFilePath!,
-            filename: logoFileName,
-          );
-        }
-
-        // Ajout obligatoire du fichier justificatif d'activité
-        final docsFileName = shopData.supportingDocsFilePath.split('/').last;
-        formFields['restaurant[supporting_docs_file]'] = await MultipartFile.fromFile(
-          shopData.supportingDocsFilePath,
-          filename: docsFileName,
-        );
-      }
-
-      final formData = FormData.fromMap(formFields);
-
-      final response = await dio.post(AuthEndPoints.register, data: formData);
 
       final data = response.data;
       if (data != null && data['success'] == true) {

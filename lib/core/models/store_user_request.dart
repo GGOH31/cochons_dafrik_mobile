@@ -1,12 +1,11 @@
-import 'store_shop_request.dart';
-
+/// Requête d'inscription — client uniquement (les comptes vendeurs sont créés
+/// par l'administration, jamais par inscription directe).
 class StoreUserRequest {
   final String role;
   final String fullName;
   final String phone;
   final String? email;
   final String password;
-  final StoreShopRequest? restaurant;
 
   StoreUserRequest({
     required this.role,
@@ -14,7 +13,6 @@ class StoreUserRequest {
     required this.phone,
     this.email,
     required this.password,
-    this.restaurant,
   });
 
   Map<String, dynamic> toJson() {
@@ -24,7 +22,6 @@ class StoreUserRequest {
       'phone': phone,
       'email': email,
       'password': password,
-      if (restaurant != null) 'restaurant': restaurant!.toJson(),
     };
   }
 }
