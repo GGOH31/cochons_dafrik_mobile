@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/file_picker_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/vendeur/domains/services/vendeur_service.dart';
@@ -29,6 +30,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
 
   bool _isOpen = false;
   bool _isLoading = false;
+  bool _isLocating = false;
   PlatformFile? _pickedLogo;
 
   @override
@@ -131,6 +133,70 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
             backgroundColor: CdaColors.rouge,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _useCurrentLocation() async {
+    setState(() {
+      _isLocating = true;
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception(
+          "Le service de localisation est désactivé sur votre téléphone.",
+        );
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception("Permission de localisation refusée.");
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+          "Permission de localisation refusée définitivement. Autorisez-la dans les réglages du téléphone.",
+        );
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      setState(() {
+        _latController.text = position.latitude.toStringAsFixed(6);
+        _lonController.text = position.longitude.toStringAsFixed(6);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Position GPS actuelle récupérée."),
+            backgroundColor: CdaColors.vertForet,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: CdaColors.rouge,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLocating = false;
+        });
       }
     }
   }
@@ -276,6 +342,39 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
 
               // GPS Row
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildLabel("Position GPS de la restaurant"),
+                  TextButton.icon(
+                    onPressed: _isLocating ? null : _useCurrentLocation,
+                    icon: _isLocating
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                CdaColors.vertForet,
+                              ),
+                            ),
+                          )
+                        : const Icon(
+                            LucideIcons.mapPin,
+                            size: 16,
+                            color: CdaColors.vertForet,
+                          ),
+                    label: Text(
+                      "Utiliser ma position actuelle",
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: CdaColors.vertForet,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
                 children: [
                   Expanded(
                     child: Column(
@@ -286,6 +385,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
                           controller: _latController,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
+                            signed: true,
                           ),
                           decoration: _buildInputDecoration("Ex: 5.3484"),
                         ),
@@ -302,6 +402,7 @@ class _FormUpdateBoutiquePageState extends State<FormUpdateBoutiquePage> {
                           controller: _lonController,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
+                            signed: true,
                           ),
                           decoration: _buildInputDecoration("Ex: -4.0305"),
                         ),

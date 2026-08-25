@@ -68,164 +68,177 @@ class _OnboardingPageState extends State<OnboardingPage> {
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-      backgroundColor: CdaColors.creme,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Bouton passer
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    _pageController.animateToPage(
-                      _slides.length - 1,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: Text(
-                    "Passer",
-                    style: GoogleFonts.nunito(
-                      color: CdaColors.vertForet,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
+        backgroundColor: CdaColors.creme,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Bouton passer
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      _pageController.animateToPage(
+                        _slides.length - 1,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Text(
+                      "Passer",
+                      style: GoogleFonts.nunito(
+                        color: CdaColors.vertForet,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            // Slider
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _slides.length,
-                onPageChanged: _onPageChanged,
-                itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Icône stylisée
-                        ClipOval(
-                          child: Container(
-                            width: 140,
-                            height: 140,
-                            color: CdaColors.vertForet.withOpacity(0.1),
-                            child: Center(
-                              child: Image.asset(
-                                "assets/images/logo.png",
-                                width: 140,
-                                height: 140,
-                                fit: BoxFit.contain,
+              // Slider
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _slides.length,
+                  onPageChanged: _onPageChanged,
+                  itemBuilder: (context, index) {
+                    final slide = _slides[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Icône stylisée
+                          ClipOval(
+                            child: Container(
+                              width: 140,
+                              height: 140,
+                              color: CdaColors.vertForet.withOpacity(0.1),
+                              child: Center(
+                                child: Image.asset(
+                                  "assets/images/logo.png",
+                                  width: 140,
+                                  height: 140,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 48),
+                          const SizedBox(height: 48),
 
-                        // Titre
-                        Text(
-                          slide.title,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.fredoka(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: CdaColors.encre,
+                          // Titre
+                          Text(
+                            slide.title,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.fredoka(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: CdaColors.encre,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Description
-                        Text(
-                          slide.description,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            fontSize: 16,
-                            color: CdaColors.gris,
-                            height: 1.5,
+                          // Description
+                          Text(
+                            slide.description,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              fontSize: 16,
+                              color: CdaColors.gris,
+                              height: 1.5,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
 
-            // Indicateurs de page (points)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _slides.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  height: 8,
-                  width: _currentPage == index ? 24 : 8,
-                  decoration: BoxDecoration(
-                    color: _currentPage == index
-                        ? CdaColors.vertForet
-                        : CdaColors.ligne,
-                    borderRadius: BorderRadius.circular(4),
+              // Indicateurs de page (points)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _slides.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    height: 8,
+                    width: _currentPage == index ? 24 : 8,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? CdaColors.vertForet
+                          : CdaColors.ligne,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
+              const SizedBox(height: 40),
 
-            // Actions (Boutons Connexion / Inscription)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 24.0,
-              ),
-              child: Column(
-                children: [
-                  CdaElevatedButton(
-                    text: "S'inscrire",
-                    onPressed: () => _completeOnboarding(AppRoutes.register),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton(
-                      onPressed: () => _completeOnboarding(AppRoutes.login),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: CdaColors.vertForet,
-                          width: 2,
+              // Actions (Boutons Connexion / Inscription)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  children: [
+                    CdaElevatedButton(
+                      text: "S'inscrire",
+                      onPressed: () => _completeOnboarding(AppRoutes.register),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: () => _completeOnboarding(AppRoutes.login),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: CdaColors.vertForet,
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        "Se connecter",
-                        style: GoogleFonts.nunito(
-                          color: CdaColors.vertForet,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
+                        child: Text(
+                          "Se connecter",
+                          style: GoogleFonts.nunito(
+                            color: CdaColors.vertForet,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () =>
+                          _completeOnboarding(AppRoutes.homeClient),
+                      child: Text(
+                        "Continuer sans compte",
+                        style: GoogleFonts.nunito(
+                          color: CdaColors.gris,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 

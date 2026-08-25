@@ -1,11 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:cochons_dafrik_mobile/core/themes/app_color.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/appHeaderBanner_common.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/client_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/profil_client/pages/client_adress_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/paiements/pages/cinetpay_webview_page.dart';
+import 'package:cochons_dafrik_mobile/presentation/features/client/paiements/pages/location_picker_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/evelatedButton_common.dart';
 
 class PaiementPage extends StatefulWidget {
@@ -17,19 +23,46 @@ class PaiementPage extends StatefulWidget {
 
 class _PaiementPageState extends State<PaiementPage> {
   final ClientService _clientService = ClientService();
-  String _selectedMethod = 'wave'; // orange, mtn, wave, card
-  final double _deliveryFee = 1000.0;
-  List<dynamic> _paymentMethods = [];
+  final double _deliveryFee = 0.0;
+  static const double cinetPayFeeRate = 0.03;
   List<dynamic> _addresses = [];
   Map<String, dynamic>? _selectedAddress;
   bool _isLoading = true;
   bool _isSubmitting = false;
   String? _errorMessage;
+  final TextEditingController _phoneController = TextEditingController();
+  LatLng? _deliveryPosition;
+  bool _isLocatingDelivery = false;
 
   @override
   void initState() {
     super.initState();
     _loadCheckoutData();
+    _loadStoredPhone();
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadStoredPhone() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userString = prefs.getString('user');
+      if (userString != null) {
+        final Map<String, dynamic> user = jsonDecode(userString);
+        final phone = user['phone']?.toString();
+        if (phone != null && phone.isNotEmpty) {
+          setState(() {
+            _phoneController.text = phone;
+          });
+        }
+      }
+    } catch (_) {
+      // Ignoré : le client peut de toute façon saisir son numéro manuellement.
+    }
   }
 
   Future<void> _loadCheckoutData() async {
@@ -38,30 +71,17 @@ class _PaiementPageState extends State<PaiementPage> {
       _errorMessage = null;
     });
     try {
-      final results = await Future.wait([
-        _clientService.getPaymentMethods(),
-        _clientService.getAddresses(),
-      ]);
-      final List<dynamic> methods = results[0] as List<dynamic>;
-      final List<dynamic> addresses = results[1] as List<dynamic>;
+      final addresses = await _clientService.getAddresses();
       setState(() {
-        _paymentMethods = methods;
         _addresses = addresses;
         _isLoading = false;
 
-        if (methods.isNotEmpty) {
-          final waveExists = methods.any((m) => m['code'] == 'wave');
-          if (waveExists) {
-            _selectedMethod = 'wave';
-          } else {
-            _selectedMethod = methods.first['code'] ?? '';
-          }
-        }
-
         if (addresses.isNotEmpty) {
-          _selectedAddress = addresses.firstWhere(
-            (addr) => addr['is_default'] == true || addr['is_default'] == 1,
-            orElse: () => addresses.first,
+          _setSelectedAddress(
+            addresses.firstWhere(
+              (addr) => addr['is_default'] == true || addr['is_default'] == 1,
+              orElse: () => addresses.first,
+            ),
           );
         } else {
           _selectedAddress = null;
@@ -75,390 +95,221 @@ class _PaiementPageState extends State<PaiementPage> {
     }
   }
 
-  Widget _buildAddressesSection() {
+  void _setSelectedAddress(Map<String, dynamic> address) {
+    _selectedAddress = address;
+    final lat = (address['latitude'] as num?)?.toDouble();
+    final lng = (address['longitude'] as num?)?.toDouble();
+    _deliveryPosition = (lat != null && lng != null) ? LatLng(lat, lng) : null;
+  }
+
+  Future<void> _shareCurrentLocation() async {
+    setState(() {
+      _isLocatingDelivery = true;
+    });
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception("Le service de localisation est désactivé.");
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception("Permission de localisation refusée.");
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+          "Permission de localisation refusée définitivement. Autorisez-la dans les réglages.",
+        );
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      setState(() {
+        _deliveryPosition = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: CdaColors.rouge,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLocatingDelivery = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _pickLocationOnMap() async {
+    final result = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (context) =>
+            LocationPickerPage(initialPosition: _deliveryPosition),
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        _deliveryPosition = result;
+      });
+    }
+  }
+
+  Widget _buildDeliveryPositionSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Adresse de livraison",
-              style: GoogleFonts.fredoka(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: CdaColors.vertForet,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(
-                LucideIcons.plusCircle,
-                color: CdaColors.vertForet,
-                size: 20,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ClientAdressPage(),
-                  ),
-                ).then((_) {
-                  _loadCheckoutData();
-                });
-              },
-            ),
-          ],
+        Text(
+          "Position de livraison",
+          style: GoogleFonts.fredoka(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: CdaColors.vertForet,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "Cette position sera partagée avec le restaurant pour la livraison.",
+          style: GoogleFonts.nunito(fontSize: 12, color: CdaColors.gris),
         ),
         const SizedBox(height: 12),
-        if (_addresses.isEmpty) ...[
+        if (_deliveryPosition != null)
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: CdaColors.vertForet, width: 1.2),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Text(
-                  "Aucune adresse enregistrée.",
-                  style: GoogleFonts.nunito(color: CdaColors.gris),
+                const Icon(
+                  LucideIcons.checkCircle2,
+                  color: CdaColors.vertForet,
+                  size: 18,
                 ),
-                const SizedBox(height: 12),
-                CdaElevatedButton(
-                  text: "Ajouter une adresse",
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ClientAdressPage(),
-                      ),
-                    ).then((_) {
-                      _loadCheckoutData();
-                    });
-                  },
-                  backgroundColor: CdaColors.vertForet,
-                  foregroundColor: Colors.white,
-                  height: 40,
-                ),
-              ],
-            ),
-          ),
-        ] else ...[
-          ..._addresses.map<Widget>((address) {
-            final isSelected =
-                _selectedAddress != null &&
-                _selectedAddress!['id'] == address['id'];
-            final String label = address['label'] ?? 'Adresse';
-            final String commune = address['commune'] ?? 'Non spécifiée';
-            final String details = address['details'] ?? '';
-            final bool isDefault =
-                address['is_default'] == true || address['is_default'] == 1;
-
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedAddress = address;
-                });
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color: isSelected
-                        ? CdaColors.vertForet
-                        : const Color(0xFFE5D5C5),
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected
-                              ? CdaColors.vertForet
-                              : CdaColors.gris,
-                          width: 2,
-                        ),
-                      ),
-                      child: isSelected
-                          ? Center(
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: CdaColors.vertForet,
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                label,
-                                style: GoogleFonts.nunito(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: CdaColors.encre,
-                                ),
-                              ),
-                              if (isDefault) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: CdaColors.vertForet.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    "Défaut",
-                                    style: GoogleFonts.nunito(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: CdaColors.vertForet,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "$commune, $details",
-                            style: GoogleFonts.nunito(
-                              fontSize: 13,
-                              color: CdaColors.gris,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildIconForMethod(String code) {
-    String? assetPath;
-    Color bgColor = Colors.white;
-    bool isAsset = true;
-
-    switch (code) {
-      case 'wave':
-        assetPath = 'assets/pictures/wave.png';
-        bgColor = const Color(0xFF1D9BF0);
-        break;
-      case 'orange_money':
-        assetPath = 'assets/pictures/orange.jpg';
-        bgColor = const Color(0xFFFF6600);
-        break;
-      case 'mtn_momo':
-        assetPath = 'assets/pictures/mtn.jpg';
-        bgColor = const Color(0xFFFFCC00);
-        break;
-      case 'moov_money':
-        assetPath = 'assets/pictures/moov.png';
-        bgColor = const Color(0xFF005A9C);
-        break;
-      case 'cash':
-        assetPath = 'assets/pictures/cash.jpg';
-        bgColor = const Color(0xFF4CAF50);
-        break;
-      default:
-        isAsset = false;
-        bgColor = CdaColors.vertForet.withOpacity(0.1);
-    }
-
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: isAsset && assetPath != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  assetPath,
-                  width: 36,
-                  height: 36,
-                  fit: BoxFit.cover,
-                ),
-              )
-            : Icon(
-                code == 'card' ? LucideIcons.creditCard : LucideIcons.wallet,
-                color: CdaColors.vertForet,
-                size: 20,
-              ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodsList() {
-    if (_isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24.0),
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(CdaColors.vertForet),
-          ),
-        ),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            "Erreur lors du chargement des moyens de paiement.",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.nunito(
-              color: CdaColors.rouge,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
-            onPressed: _loadCheckoutData,
-            icon: const Icon(LucideIcons.refreshCw, size: 14),
-            label: Text("Réessayer", style: GoogleFonts.nunito()),
-          ),
-        ],
-      );
-    }
-
-    if (_paymentMethods.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: Text(
-          "Aucun moyen de paiement disponible.",
-          style: GoogleFonts.nunito(color: CdaColors.gris),
-        ),
-      );
-    }
-
-    return Column(
-      children: _paymentMethods.map<Widget>((method) {
-        final code = method['code'] ?? '';
-        final name = method['name'] ?? '';
-        return _buildPaymentOption(
-          methodId: code,
-          iconWidget: _buildIconForMethod(code),
-          title: name,
-          subTitle: code == 'wave' ? 'Recommandé' : null,
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildPaymentOption({
-    required String methodId,
-    required Widget iconWidget,
-    required String title,
-    String? subTitle,
-  }) {
-    final isSelected = _selectedMethod == methodId;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedMethod = methodId;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: isSelected ? CdaColors.vertForet : const Color(0xFFE5D5C5),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            // Custom Radio Button
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? CdaColors.vertForet : CdaColors.gris,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: CdaColors.vertForet,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 16),
-            // Brand Icon Container
-            iconWidget,
-            const SizedBox(width: 16),
-            // Text Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Position partagée : "
+                    "${_deliveryPosition!.latitude.toStringAsFixed(5)}, "
+                    "${_deliveryPosition!.longitude.toStringAsFixed(5)}",
                     style: GoogleFonts.nunito(
-                      fontSize: 15,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: CdaColors.encre,
                     ),
                   ),
-                  if (subTitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subTitle,
-                      style: GoogleFonts.nunito(
-                        fontSize: 13,
-                        color: CdaColors.gris,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
+              ],
+            ),
+          ),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _isLocatingDelivery ? null : _shareCurrentLocation,
+                icon: _isLocatingDelivery
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(LucideIcons.locate, size: 16),
+                label: Text(
+                  "Ma position actuelle",
+                  style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: CdaColors.vertForet,
+                  side: const BorderSide(color: CdaColors.vertForet),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickLocationOnMap,
+                icon: const Icon(LucideIcons.map, size: 16),
+                label: Text(
+                  "Choisir sur la carte",
+                  style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: CdaColors.vertForet,
+                  side: const BorderSide(color: CdaColors.vertForet),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  /// La sélection d'adresse textuelle a été retirée de cet écran : la position GPS
+  /// (voir [_buildDeliveryPositionSection]) est désormais la source de vérité pour la
+  /// livraison. On garde uniquement une invite si le client n'a encore aucune adresse
+  /// enregistrée, car la commande a toujours besoin d'un `address_id`.
+  Widget _buildAddressesSection() {
+    if (_selectedAddress != null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE5D5C5), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Aucune adresse enregistrée. Ajoutez-en une pour continuer.",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: CdaColors.gris),
+          ),
+          const SizedBox(height: 12),
+          CdaElevatedButton(
+            text: "Ajouter une adresse",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ClientAdressPage(),
+                ),
+              ).then((_) {
+                _loadCheckoutData();
+              });
+            },
+            backgroundColor: CdaColors.vertForet,
+            foregroundColor: Colors.white,
+            height: 40,
+          ),
+        ],
       ),
     );
   }
@@ -646,21 +497,96 @@ class _PaiementPageState extends State<PaiementPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (_errorMessage != null) ...[
+                    Text(
+                      _errorMessage!,
+                      style: GoogleFonts.nunito(
+                        color: CdaColors.rouge,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   _buildAddressesSection(),
                   const SizedBox(height: 24),
 
-                  // Middle Section Title
+                  _buildDeliveryPositionSection(),
+                  const SizedBox(height: 24),
+
+                  // Fee notice
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: const Color(0xFFE5D5C5)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          LucideIcons.info,
+                          size: 16,
+                          color: CdaColors.vertForet,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "Des frais de transaction de ${(cinetPayFeeRate * 100).toStringAsFixed(0)}% s'appliquent, prélevés par CinetPay selon l'opérateur choisi (Orange Money, MTN, Wave, Moov, carte bancaire).",
+                            style: GoogleFonts.nunito(
+                              fontSize: 12,
+                              color: CdaColors.gris,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
                   Text(
-                    "Moyen de paiement",
+                    "Numéro Mobile Money pour le paiement",
                     style: GoogleFonts.fredoka(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: CdaColors.vertForet,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      hintText: "Ex: 0102030405",
+                      hintStyle: GoogleFonts.nunito(
+                        color: CdaColors.gris.withOpacity(0.6),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFE5D5C5)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFE5D5C5)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Ce numéro peut être différent de celui de votre compte : c'est celui qui sera débité.",
+                    style: GoogleFonts.nunito(
+                      fontSize: 12,
+                      color: CdaColors.gris,
+                    ),
+                  ),
                   const SizedBox(height: 16),
-
-                  _buildPaymentMethodsList(),
 
                   // Escrow notification banner (orange border/bg)
                   Container(
@@ -741,11 +667,54 @@ class _PaiementPageState extends State<PaiementPage> {
                   return;
                 }
 
+                final payerPhone = _phoneController.text.trim();
+                if (payerPhone.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "Veuillez saisir le numéro Mobile Money à utiliser pour le paiement.",
+                      ),
+                      backgroundColor: CdaColors.rouge,
+                    ),
+                  );
+                  return;
+                }
+
+                if (_deliveryPosition == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "Veuillez partager votre position de livraison (position actuelle ou carte).",
+                      ),
+                      backgroundColor: CdaColors.rouge,
+                    ),
+                  );
+                  return;
+                }
+
                 setState(() {
                   _isSubmitting = true;
                 });
 
                 try {
+                  // 0. Persist the shared delivery position on the selected address
+                  // so the restaurant can see it for this order.
+                  final address = _selectedAddress!;
+                  final addressLat = (address['latitude'] as num?)?.toDouble();
+                  final addressLng = (address['longitude'] as num?)?.toDouble();
+                  if (addressLat != _deliveryPosition!.latitude ||
+                      addressLng != _deliveryPosition!.longitude) {
+                    await _clientService
+                        .updateAddress(address['id'].toString(), {
+                          'label': address['label'] ?? 'Adresse',
+                          'commune': address['commune'],
+                          'details': address['details'] ?? '',
+                          'is_default': address['is_default'] == true,
+                          'latitude': _deliveryPosition!.latitude,
+                          'longitude': _deliveryPosition!.longitude,
+                        });
+                  }
+
                   // 1. Create order payload
                   final firstItem = cartItems.first;
                   final restaurantId = firstItem.restaurantId;
@@ -774,41 +743,85 @@ class _PaiementPageState extends State<PaiementPage> {
                   );
                   final String orderId = orderResult['id'].toString();
 
-                  // 3. Prepare payment info (simulated Wave callback or method ID)
-                  final selectedMethodObject = _paymentMethods.firstWhere(
-                    (m) => m['code'] == _selectedMethod,
-                    orElse: () => null,
-                  );
-                  final paymentMethodId = selectedMethodObject?['id'];
+                  // 3. Initialize the real CinetPay payment and get the payment_url
+                  final initResult = await _clientService
+                      .initiateCinetPayPayment(orderId, phone: payerPhone);
+                  final String? paymentUrl =
+                      initResult['payment_url'] as String?;
 
-                  final Map<String, dynamic> payData = {
-                    'payment_method_id': paymentMethodId,
-                    'provider_ref':
-                        'WAVE-SIM-${DateTime.now().millisecondsSinceEpoch}',
-                  };
-
-                  if (paymentMethodId == null) {
-                    payData['provider'] = _selectedMethod;
+                  if (paymentUrl == null || paymentUrl.isEmpty) {
+                    throw Exception(
+                      "Impossible d'obtenir l'URL de paiement CinetPay.",
+                    );
                   }
-
-                  // 4. Simulate payment callback
-                  await _clientService.payOrder(orderId, payData);
 
                   setState(() {
                     _isSubmitting = false;
                   });
 
-                  if (mounted) {
+                  if (!mounted) return;
+
+                  // 4. Open CinetPay's hosted payment page in an in-app WebView.
+                  final CinetPayResult? webviewResult =
+                      await Navigator.of(context).push<CinetPayResult>(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CinetPayWebviewPage(paymentUrl: paymentUrl),
+                        ),
+                      );
+
+                  if (!mounted) return;
+
+                  setState(() {
+                    _isSubmitting = true;
+                  });
+
+                  // 5. Re-verify the payment status with the backend (source of truth),
+                  // regardless of what the WebView redirect said.
+                  bool isPaid = false;
+                  try {
+                    final verifiedOrder = await _clientService
+                        .verifyCinetPayPayment(orderId);
+                    isPaid = verifiedOrder['status'] == 'paid';
+                  } catch (_) {
+                    // Le paiement peut encore être en cours de traitement côté CinetPay.
+                  }
+
+                  setState(() {
+                    _isSubmitting = false;
+                  });
+
+                  if (!mounted) return;
+
+                  if (isPaid) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          "Commande et paiement enregistrés avec succès !",
+                          "Paiement effectué avec succès ! Votre commande est en cours de préparation.",
                         ),
                         backgroundColor: CdaColors.vertForet,
                       ),
                     );
                     cartService.clearCart();
                     Navigator.of(context).popUntil((route) => route.isFirst);
+                  } else if (webviewResult == CinetPayResult.cancelled) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Paiement annulé. Votre commande reste en attente de paiement, vous pouvez réessayer.",
+                        ),
+                        backgroundColor: CdaColors.rouge,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Paiement non confirmé pour le moment. Vérifiez le statut de votre commande dans quelques instants.",
+                        ),
+                        backgroundColor: CdaColors.rouge,
+                      ),
+                    );
                   }
                 } catch (e) {
                   setState(() {

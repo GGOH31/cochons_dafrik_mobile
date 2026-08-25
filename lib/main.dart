@@ -48,12 +48,11 @@ class MyApp extends StatelessWidget {
       theme: cdaTheme(),
       initialRoute: showOnboarding
           ? AppRoutes.onBoarding
-          : (token != null &&
-                token!.isNotEmpty &&
-                role != null &&
-                role!.isNotEmpty)
-          ? (role == 'vendeur' ? AppRoutes.homeVendeur : AppRoutes.homeClient)
-          : AppRoutes.login,
+          : (role == 'vendeur' && token != null && token!.isNotEmpty)
+          ? AppRoutes.homeVendeur
+          // Un client peut parcourir le catalogue sans être connecté ; l'authentification
+          // n'est demandée qu'au moment de passer commande (voir intercepteur 401 dans DioClient).
+          : AppRoutes.homeClient,
       routes: {
         AppRoutes.onBoarding: (context) => const OnboardingPage(),
         AppRoutes.login: (context) => const LoginPage(),

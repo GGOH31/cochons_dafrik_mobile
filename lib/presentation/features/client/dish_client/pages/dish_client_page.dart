@@ -10,6 +10,7 @@ import 'package:cochons_dafrik_mobile/presentation/features/client/domains/servi
 import 'package:cochons_dafrik_mobile/presentation/features/client/panier/pages/panier_page.dart';
 import 'package:cochons_dafrik_mobile/presentation/features/client/domains/services/cart_service.dart';
 import 'package:cochons_dafrik_mobile/presentation/common/appBar_common.dart';
+import 'package:cochons_dafrik_mobile/core/utils/maps_launcher.dart';
 
 class DishClientPage extends StatefulWidget {
   const DishClientPage({super.key});
@@ -206,6 +207,56 @@ class _DishClientPageState extends State<DishClientPage> {
                                 ),
                               ],
                             ),
+                            if (restaurant.hasGpsPosition) ...[
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () async {
+                                  final opened = await openMapsDirections(
+                                    latitude: restaurant.latitude!,
+                                    longitude: restaurant.longitude!,
+                                  );
+                                  if (!opened && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Impossible d'ouvrir une application de cartographie.",
+                                        ),
+                                        backgroundColor: CdaColors.rouge,
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        LucideIcons.navigation,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        "Itinéraire",
+                                        style: GoogleFonts.nunito(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

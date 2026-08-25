@@ -7,6 +7,8 @@ class Restaurant {
   final String speciality;
   final List<Dish> dishes;
   final String? logoUrl;
+  final double? latitude;
+  final double? longitude;
 
   const Restaurant({
     required this.id,
@@ -17,7 +19,11 @@ class Restaurant {
     required this.speciality,
     required this.dishes,
     this.logoUrl,
+    this.latitude,
+    this.longitude,
   });
+
+  bool get hasGpsPosition => latitude != null && longitude != null;
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     return Restaurant(
@@ -29,6 +35,8 @@ class Restaurant {
       speciality: json['description'] ?? 'Vendeur de porc braisé',
       dishes: [],
       logoUrl: json['logo_url'],
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }
@@ -68,7 +76,11 @@ class Dish {
     this.deliveryZone,
   });
 
-  factory Dish.fromJson(Map<String, dynamic> json, String restaurantName, {String restaurantLocation = 'Cocody'}) {
+  factory Dish.fromJson(
+    Map<String, dynamic> json,
+    String restaurantName, {
+    String restaurantLocation = 'Cocody',
+  }) {
     return Dish(
       id: json['id']?.toString() ?? '',
       restaurantId: json['restaurant_id']?.toString() ?? '',

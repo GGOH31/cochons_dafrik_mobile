@@ -26,8 +26,10 @@ class DioClient {
       headers: {'Accept': 'application/json'},
     );
 
-    // Désactiver SSL pour dev
-    if (kDebugMode) {
+    // Désactiver SSL pour dev (uniquement mobile/desktop : sur le web, Dio utilise
+    // BrowserHttpClientAdapter, qui ne supporte pas ce réglage et n'en a pas besoin,
+    // le navigateur gérant lui-même les certificats).
+    if (kDebugMode && !kIsWeb) {
       disableSSL(); // ou disableSSLForDevHosts(['localhost', '127.0.0.1'])
     }
 

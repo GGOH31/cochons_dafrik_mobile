@@ -161,7 +161,9 @@ class ClientService extends BaseService {
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la création de la commande');
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la création de la commande',
+        );
       }
     } catch (e) {
       rethrow;
@@ -169,13 +171,63 @@ class ClientService extends BaseService {
   }
 
   /// Payer une commande (simulation)
-  Future<Map<String, dynamic>> payOrder(String orderId, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> payOrder(
+    String orderId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final res = await create('${ClientEndPoints.orders}/$orderId/pay', data);
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du paiement de la commande');
+        throw Exception(
+          res['message'] ?? 'Erreur lors du paiement de la commande',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Initialiser un paiement CinetPay pour une commande.
+  /// [phone] est le numéro Mobile Money à utiliser pour ce paiement (saisi par le client,
+  /// peut différer de son numéro de compte).
+  /// Retourne { payment_url, order } : payment_url doit être ouverte dans une WebView.
+  Future<Map<String, dynamic>> initiateCinetPayPayment(
+    String orderId, {
+    String? phone,
+  }) async {
+    try {
+      final res = await create(
+        '${ClientEndPoints.orders}/$orderId/pay/cinetpay',
+        {if (phone != null && phone.isNotEmpty) 'phone': phone},
+      );
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(
+          res['message'] ??
+              "Erreur lors de l'initialisation du paiement CinetPay",
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Re-vérifier le statut d'un paiement CinetPay auprès du serveur (après retour de la WebView).
+  Future<Map<String, dynamic>> verifyCinetPayPayment(String orderId) async {
+    try {
+      final res = await create(
+        '${ClientEndPoints.orders}/$orderId/pay/cinetpay/verify',
+        {},
+      );
+      if (res['success'] == true) {
+        return res['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la vérification du paiement',
+        );
       }
     } catch (e) {
       rethrow;
@@ -201,7 +253,9 @@ class ClientService extends BaseService {
         }
         return [];
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors du chargement des commandes');
+        throw Exception(
+          res['message'] ?? 'Erreur lors du chargement des commandes',
+        );
       }
     } catch (e) {
       rethrow;
@@ -215,7 +269,9 @@ class ClientService extends BaseService {
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la récupération de la commande');
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la récupération de la commande',
+        );
       }
     } catch (e) {
       rethrow;
@@ -225,11 +281,16 @@ class ClientService extends BaseService {
   /// Confirmer la réception d'une commande
   Future<Map<String, dynamic>> confirmReception(String orderId) async {
     try {
-      final res = await create('${ClientEndPoints.orders}/$orderId/confirm', {});
+      final res = await create(
+        '${ClientEndPoints.orders}/$orderId/confirm',
+        {},
+      );
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la confirmation de réception');
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la confirmation de réception',
+        );
       }
     } catch (e) {
       rethrow;
@@ -237,13 +298,21 @@ class ClientService extends BaseService {
   }
 
   /// Soumettre un avis sur une commande
-  Future<Map<String, dynamic>> submitReview(String orderId, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> submitReview(
+    String orderId,
+    Map<String, dynamic> data,
+  ) async {
     try {
-      final res = await create('${ClientEndPoints.orders}/$orderId/review', data);
+      final res = await create(
+        '${ClientEndPoints.orders}/$orderId/review',
+        data,
+      );
       if (res['success'] == true) {
         return res['data'] as Map<String, dynamic>;
       } else {
-        throw Exception(res['message'] ?? 'Erreur lors de la soumission de l\'avis');
+        throw Exception(
+          res['message'] ?? 'Erreur lors de la soumission de l\'avis',
+        );
       }
     } catch (e) {
       rethrow;
